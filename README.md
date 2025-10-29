@@ -7,7 +7,9 @@ A minimal, robust HTML editor foundation built around a clean AST (Abstract Synt
 ```
 html-editor/
 ├── packages/
-│   └── core-ast/          # Core HTML AST processing library
+│   ├── core-ast/          # Core HTML AST processing library
+│   └── editor-ui/         # Real-time Monaco + Canvas editor
+├── demo/                  # Demo application
 └── ...
 ```
 
@@ -24,6 +26,18 @@ The core HTML AST processing library providing:
 - **Diff/Patch** utilities for efficient updates
 
 See [packages/core-ast/README.md](./packages/core-ast/README.md) for detailed documentation.
+
+### @html-editor/editor-ui
+
+Real-time bidirectional editor with Monaco and visual canvas:
+
+- **Real-time Sync** between code and visual representation (<100ms latency)
+- **Selection Mapping** - click canvas → highlight code, and vice versa
+- **Debounced Parsing** for optimal performance
+- **Error Handling** with non-blocking UI
+- **Performance Monitoring** for large documents
+
+See [packages/editor-ui/README.md](./packages/editor-ui/README.md) for detailed documentation.
 
 ## Development
 
@@ -50,6 +64,18 @@ npm test
 ```bash
 npm run typecheck
 ```
+
+### Demo Application
+
+Run the interactive demo:
+
+```bash
+cd demo
+npm install
+npm run dev
+```
+
+Then open http://localhost:3000 in your browser.
 
 ## Architecture
 

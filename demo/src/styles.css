@@ -1,0 +1,135 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
+    Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  overflow: hidden;
+}
+
+#root {
+  width: 100vw;
+  height: 100vh;
+}
+
+.visual-canvas {
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.canvas-root {
+  background: white;
+  padding: 20px;
+  min-height: 100%;
+}
+
+.canvas-element {
+  display: block;
+  position: relative;
+}
+
+.canvas-element:hover {
+  outline: 1px dashed #999;
+}
+
+.canvas-element-selected {
+  background-color: rgba(0, 122, 204, 0.1) !important;
+}
+
+.canvas-text {
+  white-space: pre-wrap;
+}
+
+.canvas-comment {
+  color: #6a9955;
+  font-style: italic;
+}
+
+.error-banner {
+  background-color: #ff6b6b;
+  color: white;
+  padding: 12px 20px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.selected-node-highlight {
+  background-color: rgba(0, 122, 204, 0.2);
+}
+
+.placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #999;
+  font-size: 16px;
+}
+
+.canvas-element-h1,
+.canvas-element-h2,
+.canvas-element-h3,
+.canvas-element-h4,
+.canvas-element-h5,
+.canvas-element-h6 {
+  font-weight: bold;
+  margin: 16px 0 8px 0;
+}
+
+.canvas-element-h1 {
+  font-size: 2em;
+}
+
+.canvas-element-h2 {
+  font-size: 1.5em;
+}
+
+.canvas-element-h3 {
+  font-size: 1.17em;
+}
+
+.canvas-element-p {
+  margin: 8px 0;
+}
+
+.canvas-element-ul,
+.canvas-element-ol {
+  margin: 8px 0;
+  padding-left: 40px;
+}
+
+.canvas-element-blockquote {
+  border-left: 4px solid #ddd;
+  padding-left: 16px;
+  margin: 16px 0;
+  color: #666;
+}
+
+.canvas-element-code {
+  background-color: #f4f4f4;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 0.9em;
+}
+
+.canvas-element-a {
+  color: #007acc;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.canvas-element-strong {
+  font-weight: bold;
+}
+
+.canvas-element-em {
+  font-style: italic;
+}
