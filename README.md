@@ -1,6 +1,6 @@
 # HTML Editor
 
-A modern web-based HTML editor built with performance, testing, and developer ergonomics in mind.
+A modern web-based HTML editor built with performance, testing, and developer ergonomics in mind. The platform is centered around a robust HTML Abstract Syntax Tree (AST) pipeline that powers real-time synchronization between the Monaco code editor and the visual canvas.
 
 ## Getting Started
 
@@ -18,10 +18,8 @@ pnpm install
 ### Development
 
 ```bash
-# Start the development server
 pnpm dev
-
-# The app will be available at http://localhost:5173
+# Starts the web app dev server on http://localhost:5173
 ```
 
 ## Project Structure
@@ -29,52 +27,38 @@ pnpm dev
 ```
 html-editor/
 ├── apps/
-│   └── web/                    # Main React application
-│       ├── e2e/                # E2E tests (Playwright)
-│       ├── src/
-│       │   ├── store/          # Zustand state management
-│       │   ├── App.tsx         # Main app component
-│       │   └── main.tsx        # Entry point
-│       └── package.json
+│   └── web/                    # Main React application (tri-pane workspace)
+│       ├── e2e/                # Playwright smoke tests
+│       └── src/                # Canvas, Monaco, outline panes, Zustand store
+├── demo/                       # Standalone demo powered by editor packages
 ├── packages/
-│   ├── core-ast/               # HTML AST utilities (unified/rehype/hast)
-│   │   ├── src/
-│   │   │   ├── index.ts        # parse, toHtml, addIds functions
-│   │   │   └── tests/
-│   │   └── package.json
-│   └── paste/                  # Clipboard handling utilities
-│       ├── src/
-│       │   └── index.ts        # readClipboard, writeClipboard functions
-│       └── package.json
-├── .github/
-│   └── workflows/
-│       └── ci.yml              # CI pipeline (lint, test, e2e)
-├── pnpm-workspace.yaml         # pnpm workspace configuration
-└── package.json                # Root package with scripts
+│   ├── core-ast/               # HTML AST processing pipeline
+│   ├── editor-ui/              # Shared editor UI components + state
+│   └── paste/                  # Clipboard utilities
+├── pnpm-workspace.yaml         # Workspace configuration
+└── package.json                # Root scripts and tooling
 ```
 
-## Available Scripts
-
-### Root Scripts
+## Root Scripts
 
 - `pnpm dev` - Start the development server for the web app
 - `pnpm build` - Build all packages and apps
 - `pnpm test` - Run unit tests with Vitest
 - `pnpm test:watch` - Run unit tests in watch mode
-- `pnpm e2e` - Run E2E tests with Playwright
-- `pnpm e2e:ui` - Run E2E tests with Playwright UI
+- `pnpm e2e` - Run Playwright smoke tests
+- `pnpm e2e:ui` - Run Playwright tests in UI mode
 - `pnpm lint` - Lint all TypeScript files
-- `pnpm lint:fix` - Lint and fix all TypeScript files
-- `pnpm format` - Format all files with Prettier
-- `pnpm format:check` - Check formatting with Prettier
-- `pnpm typecheck` - Run TypeScript type checking for all packages
+- `pnpm lint:fix` - Lint and fix TypeScript files
+- `pnpm format` - Format files with Prettier
+- `pnpm format:check` - Verify formatting
+- `pnpm typecheck` - Run TypeScript type checking across the workspace
 
 ### Workspace-Specific Scripts
 
 ```bash
-# Run scripts in specific workspaces
 pnpm --filter @html-editor/web dev
-pnpm --filter @html-editor/core-ast build
+pnpm --filter @html-editor/core-ast test
+pnpm --filter @html-editor/editor-ui test
 ```
 
 ## Technology Stack
@@ -84,63 +68,54 @@ pnpm --filter @html-editor/core-ast build
 - **Language**: TypeScript
 - **State Management**: Zustand
 - **Editor**: Monaco Editor
-- **Testing**: Vitest (unit), Playwright (e2e), Testing Library
-- **Linting**: ESLint with TypeScript and React plugins
+- **Testing**: Vitest (unit) & Playwright (e2e)
+- **Linting**: ESLint with TypeScript + React plugins
 - **Formatting**: Prettier
 - **Package Manager**: pnpm with workspaces
-- **CI/CD**: GitHub Actions
+- **Automation**: GitHub Actions & Husky
 
-## Package Details
-
-### @html-editor/web
-
-The main React application featuring:
-
-- Responsive tri-pane layout with toolbar, outline explorer, canvas preview, and Monaco editor
-- Zustand store for document state, history stubs, and UI flags
-- Keyboard shortcuts for undo/redo/delete operations via a shared hook
-- Mock outline tree and AST scaffolding for future document synchronization
+## Packages
 
 ### @html-editor/core-ast
 
-HTML AST manipulation utilities:
+The core HTML AST processing library providing:
 
-- `parse(html: string)`: Parse HTML to HAST (Hypertext Abstract Syntax Tree)
-- `toHtml(tree: Root)`: Convert HAST back to HTML string
-- `addIds(tree: Root)`: Add unique `data-editor-id` attributes to elements
+- Parse HTML to HAST with stable node identity
+- Normalize trees for consistent comparison
+- Serialize, diff, and patch utilities for efficient updates
 
-Built with unified, rehype, and hast utilities.
+See [packages/core-ast/README.md](./packages/core-ast/README.md) for detailed documentation.
+
+### @html-editor/editor-ui
+
+Real-time editor primitives used across the workspace:
+
+- Monaco ↔ canvas synchronization with debounced parsing
+- Selection mapping between code and visual panes
+- Error handling and performance monitoring helpers
+
+See [packages/editor-ui/README.md](./packages/editor-ui/README.md) for detailed documentation.
 
 ### @html-editor/paste
 
-Clipboard handling utilities (skeleton for future integration):
+Clipboard handling utilities for ingesting and emitting HTML + text payloads.
 
-- `readClipboard()`: Read HTML and text from clipboard
-- `writeClipboard(data)`: Write HTML and text to clipboard
+## Demo Application
 
-## CI/CD
+```bash
+pnpm --filter html-editor-demo dev
+```
 
-The project includes a GitHub Actions workflow that runs on PRs and pushes to main:
+Open http://localhost:5173 to try the interactive editor demo.
 
-1. **Lint**: ESLint and Prettier checks
-2. **Typecheck**: TypeScript type checking across all packages
-3. **Unit Tests**: Vitest unit tests
-4. **E2E Tests**: Playwright smoke tests
+## Testing & Tooling
 
-## Git Hooks
+The project ships with automated linting, formatting, unit, and end-to-end testing. Husky + lint-staged run the most important checks pre-commit, and GitHub Actions validates every push and pull request.
 
-The project uses Husky and lint-staged for pre-commit hooks:
+## Architecture
 
-- Lints and formats staged TypeScript files
-- Formats staged JSON and Markdown files
-
-## Development Guidelines
-
-- Follow existing code conventions and patterns
-- Write tests for new features
-- Ensure all CI checks pass before merging
-- Use meaningful commit messages
+The HTML Editor is built around a single source of truth: the HTML AST. All parsing, editing, serialization, and diffing operations flow through this representation to maintain consistency, enable undo/redo across code and canvas, and preserve semantic HTML.
 
 ## License
 
-See [LICENSE](./LICENSE) file for details.
+See [LICENSE](./LICENSE).

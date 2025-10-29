@@ -11,17 +11,26 @@
       "import": "./dist/index.js"
     }
   },
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsc",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
-    "@types/hast": "^3.0.4",
     "hast-util-to-html": "^9.0.0",
+    "prettier": "^3.1.1",
     "rehype-parse": "^9.0.0",
-    "unified": "^11.0.4"
+    "unified": "^11.0.4",
+    "unist-util-visit": "^5.0.0"
   },
   "devDependencies": {
-    "typescript": "^5.3.3"
+    "@types/hast": "^3.0.4",
+    "@types/node": "^20.10.5",
+    "typescript": "^5.3.3",
+    "vitest": "^1.1.0"
   }
 }
