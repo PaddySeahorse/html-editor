@@ -96,9 +96,10 @@ pnpm --filter @html-editor/core-ast build
 
 The main React application featuring:
 
-- Split layout with Monaco editor and canvas preview
-- Zustand store for document state management
-- Selection model types
+- Responsive tri-pane layout with toolbar, outline explorer, canvas preview, and Monaco editor
+- Zustand store for document state, history stubs, and UI flags
+- Keyboard shortcuts for undo/redo/delete operations via a shared hook
+- Mock outline tree and AST scaffolding for future document synchronization
 
 ### @html-editor/core-ast
 
