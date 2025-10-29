@@ -15,5 +15,15 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true
-  }
+  },
+  "include": [
+    "apps",
+    "packages",
+    "demo",
+    "src",
+    "vitest.config.ts",
+    "playwright.config.ts",
+    "vite.config.ts"
+  ],
+  "references": [{ "path": "./tsconfig.node.json" }]
 }

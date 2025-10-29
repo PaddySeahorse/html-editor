@@ -20,7 +20,7 @@ module.exports = {
       jsx: true,
     },
   },
-  plugins: ['@typescript-eslint', 'react', 'react-hooks'],
+  plugins: ['@typescript-eslint', 'react', 'react-hooks', 'react-refresh'],
   settings: {
     react: {
       version: 'detect',
@@ -28,7 +28,8 @@ module.exports = {
   },
   rules: {
     'react/react-in-jsx-scope': 'off',
-    '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
+    'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
+    '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
   },
-  ignorePatterns: ['dist', 'node_modules', '*.cjs'],
+  ignorePatterns: ['dist', 'node_modules', '*.cjs', '.eslintrc.cjs'],
 };
