@@ -11,14 +11,10 @@ export interface MonacoEditorProps {
   onReady?: () => void;
 }
 
-export function MonacoEditor({
-  initialValue = '',
-  debounceMs = 75,
-  onReady,
-}: MonacoEditorProps) {
+export function MonacoEditor({ initialValue = '', debounceMs = 75, onReady }: MonacoEditorProps) {
   const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
   const decorationsRef = useRef<string[]>([]);
-  
+
   const {
     htmlContent,
     selectedNodeId,
@@ -66,12 +62,9 @@ export function MonacoEditor({
       // Undo hook - will be implemented in history task
     });
 
-    editor.addCommand(
-      monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift | monaco.KeyCode.KeyZ,
-      () => {
-        // Redo hook - will be implemented in history task
-      }
-    );
+    editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift | monaco.KeyCode.KeyZ, () => {
+      // Redo hook - will be implemented in history task
+    });
 
     onReady?.();
   };

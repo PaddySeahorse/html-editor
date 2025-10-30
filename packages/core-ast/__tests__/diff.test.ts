@@ -14,22 +14,22 @@ describe('diff and patch', () => {
       const html = '<div><p>Old Text</p></div>';
       const tree = parseHtml(html);
       assignIds(tree);
-      
+
       const div = tree.children[0];
       if (div.type === 'element') {
         const p = div.children[0];
         if (p.type === 'element') {
           const id = p.properties?.dataId as string;
-          
+
           const newP: Element = {
             type: 'element',
             tagName: 'p',
             properties: { dataId: id },
             children: [{ type: 'text', value: 'New Text' }],
           };
-          
+
           applyPatch(tree, id, newP);
-          
+
           const updatedP = div.children[0];
           if (updatedP.type === 'element') {
             const text = updatedP.children[0];
@@ -45,14 +45,14 @@ describe('diff and patch', () => {
       const html = '<div>Content</div>';
       const tree = parseHtml(html);
       assignIds(tree);
-      
+
       const newNode: Element = {
         type: 'element',
         tagName: 'p',
         properties: {},
         children: [],
       };
-      
+
       expect(() => applyPatch(tree, 'non-existent', newNode)).toThrow();
     });
   });
@@ -62,22 +62,22 @@ describe('diff and patch', () => {
       const html = '<div><p>Text</p></div>';
       const tree = parseHtml(html);
       assignIds(tree);
-      
+
       const div = tree.children[0];
       if (div.type === 'element') {
         const p = div.children[0];
         if (p.type === 'element') {
           const id = p.properties?.dataId as string;
-          
+
           const newP: Element = {
             type: 'element',
             tagName: 'p',
             properties: { dataId: id },
             children: [{ type: 'text', value: 'Updated' }],
           };
-          
+
           replaceNodeById(tree, id, newP);
-          
+
           const updatedP = div.children[0];
           if (updatedP.type === 'element') {
             const text = updatedP.children[0];
@@ -94,14 +94,14 @@ describe('diff and patch', () => {
     it('should detect when IDs are removed', () => {
       const html1 = '<div><p>One</p><p>Two</p></div>';
       const html2 = '<div><p>One</p></div>';
-      
+
       const tree1 = parseHtml(html1);
       const tree2 = parseHtml(html2);
       assignIds(tree1);
       assignIds(tree2);
-      
+
       const changes = detectChanges(tree1, tree2);
-      
+
       expect(changes.length).toBeGreaterThan(0);
       expect(changes[0].type).toBe('reparse');
     });
@@ -109,14 +109,14 @@ describe('diff and patch', () => {
     it('should detect when IDs are added', () => {
       const html1 = '<div><p>One</p></div>';
       const html2 = '<div><p>One</p><p>Two</p></div>';
-      
+
       const tree1 = parseHtml(html1);
       const tree2 = parseHtml(html2);
       assignIds(tree1);
       assignIds(tree2);
-      
+
       const changes = detectChanges(tree1, tree2);
-      
+
       expect(changes.length).toBeGreaterThan(0);
       expect(changes[0].type).toBe('reparse');
     });
@@ -124,10 +124,10 @@ describe('diff and patch', () => {
     it('should return empty array when no structural changes', () => {
       const html1 = '<div><p>Text</p></div>';
       const html2 = '<div><p>Text</p></div>';
-      
+
       const tree1 = parseHtml(html1);
       assignIds(tree1);
-      
+
       const tree2 = parseHtml(html2);
       const div1 = tree1.children[0];
       if (div1.type === 'element') {
@@ -135,7 +135,7 @@ describe('diff and patch', () => {
         if (p1.type === 'element') {
           const divId = div1.properties?.dataId;
           const pId = p1.properties?.dataId;
-          
+
           const div2 = tree2.children[0];
           if (div2.type === 'element') {
             div2.properties = { ...div2.properties, dataId: divId };
@@ -146,9 +146,9 @@ describe('diff and patch', () => {
           }
         }
       }
-      
+
       const changes = detectChanges(tree1, tree2);
-      
+
       expect(changes.length).toBe(0);
     });
   });

@@ -25,13 +25,7 @@ npm install @html-editor/editor-ui
 import { Editor } from '@html-editor/editor-ui';
 
 function App() {
-  return (
-    <Editor
-      initialHtml="<div><h1>Hello World</h1></div>"
-      debounceMs={75}
-      splitRatio={0.5}
-    />
-  );
+  return <Editor initialHtml="<div><h1>Hello World</h1></div>" debounceMs={75} splitRatio={0.5} />;
 }
 ```
 
@@ -57,20 +51,12 @@ function CustomLayout() {
 import { useEditorStore } from '@html-editor/editor-ui';
 
 function CustomComponent() {
-  const {
-    htmlContent,
-    ast,
-    selectedNodeId,
-    updateHtml,
-    selectNode,
-  } = useEditorStore();
+  const { htmlContent, ast, selectedNodeId, updateHtml, selectNode } = useEditorStore();
 
   return (
     <div>
       <p>Selected: {selectedNodeId}</p>
-      <button onClick={() => updateHtml('<div>New content</div>')}>
-        Update
-      </button>
+      <button onClick={() => updateHtml('<div>New content</div>')}>Update</button>
     </div>
   );
 }
@@ -86,8 +72,7 @@ function PerformanceDisplay() {
 
   return (
     <div>
-      Parse time: {metrics.parseTime.toFixed(2)}ms
-      Node count: {metrics.nodeCount}
+      Parse time: {metrics.parseTime.toFixed(2)}ms Node count: {metrics.nodeCount}
     </div>
   );
 }
@@ -98,6 +83,7 @@ function PerformanceDisplay() {
 ### Data Flow
 
 #### Code → AST → Canvas
+
 1. User types in Monaco editor
 2. Change is debounced (50-100ms)
 3. HTML is parsed to AST via `@html-editor/core-ast`
@@ -107,6 +93,7 @@ function PerformanceDisplay() {
 7. Falls back to full re-render if needed
 
 #### Canvas → AST → Code
+
 1. User clicks canvas node
 2. Node ID selected in store
 3. AST mutations applied
@@ -124,28 +111,35 @@ function PerformanceDisplay() {
 ### Components
 
 #### `<Editor>`
+
 Main editor component with split view.
 
 Props:
+
 - `initialHtml?: string` - Initial HTML content
 - `debounceMs?: number` - Debounce delay (default: 75ms)
 - `splitRatio?: number` - Split ratio between code and canvas (default: 0.5)
 
 #### `<MonacoEditor>`
+
 Monaco editor wrapper with AST sync.
 
 Props:
+
 - `initialValue?: string` - Initial content
 - `debounceMs?: number` - Debounce delay
 - `onReady?: () => void` - Callback when editor is ready
 
 #### `<VisualCanvas>`
+
 Visual representation of the AST.
 
 Props:
+
 - `className?: string` - Additional CSS class
 
 #### `<ErrorBanner>`
+
 Non-blocking error display.
 
 ### Store
@@ -153,6 +147,7 @@ Non-blocking error display.
 #### `useEditorStore`
 
 State:
+
 - `htmlContent: string` - Current HTML
 - `ast: Root | null` - Current AST
 - `indexMaps: NodeIndexMap | null` - ID and range maps
@@ -162,6 +157,7 @@ State:
 - `cursorPosition: { line, column } | null` - Cursor position
 
 Actions:
+
 - `updateHtml(html: string)` - Update from HTML source
 - `updateAst(ast: Root)` - Update from AST
 - `selectNode(nodeId: string | null)` - Select/deselect node
@@ -173,31 +169,39 @@ Actions:
 ### Utilities
 
 #### `getNodeRange(nodeId, indexMaps, htmlContent): CodeRange | null`
+
 Get code range for a node.
 
 #### `findNodeAtPosition(line, column, indexMaps, htmlContent): string | null`
+
 Find node at cursor position.
 
 #### `offsetToLineColumn(content, offset): { line, column }`
+
 Convert offset to line/column.
 
 #### `lineColumnToOffset(content, line, column): number`
+
 Convert line/column to offset.
 
 ### Hooks
 
 #### `useEditorSync(options)`
+
 Monitor sync operations and performance.
 
 Options:
+
 - `onAstUpdate?: (html: string) => void`
 - `onSelectionChange?: (nodeId: string | null) => void`
 - `performanceThreshold?: number` - Warning threshold in ms
 
 #### `usePerformanceMonitor(enabled)`
+
 Track performance metrics.
 
 Returns:
+
 - `parseTime: number` - Parse duration
 - `renderTime: number` - Render duration
 - `totalTime: number` - Total duration
@@ -206,28 +210,33 @@ Returns:
 ## Performance
 
 ### Targets
+
 - **Typical edit latency**: <100ms
 - **Document size**: 300-500 nodes
 - **Debounce**: 50-100ms
 
 ### Optimization Strategies
+
 - Debounced parsing to reduce parse frequency
 - Selective canvas updates when possible
 - Index maps for O(1) node lookup
 - Lazy AST normalization
 
 ### Monitoring
+
 Use `usePerformanceMonitor` to track actual performance and identify bottlenecks.
 
 ## Error Handling
 
 ### Parse Errors
+
 - Non-blocking error banner displayed
 - Last valid AST preserved
 - Best-effort recovery attempted
 - User can dismiss error and continue editing
 
 ### Invalid HTML
+
 - Parser is permissive (fragment mode)
 - Most HTML errors auto-corrected
 - Unclosed tags handled gracefully

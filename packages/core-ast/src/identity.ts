@@ -31,7 +31,7 @@ export function buildIndexMaps(root: Root): NodeIndexMap {
     const id = node.properties?.dataId as string | undefined;
     if (id) {
       byId.set(id, node);
-      
+
       if (node.position) {
         byTextRange.set(id, {
           start: node.position.start.offset || 0,
@@ -46,13 +46,13 @@ export function buildIndexMaps(root: Root): NodeIndexMap {
 
 export function findNodeById(root: Root, id: string): Element | undefined {
   let found: Element | undefined;
-  
+
   visit(root, 'element', (node: Element) => {
     if (node.properties?.dataId === id) {
       found = node;
       return false;
     }
   });
-  
+
   return found;
 }

@@ -4,7 +4,7 @@ Get up and running with the HTML Editor in 5 minutes.
 
 ## Prerequisites
 
-- Node.js 18+ 
+- Node.js 18+
 - npm 9+
 
 ## Installation
@@ -72,13 +72,7 @@ npm install @html-editor/core-ast @html-editor/editor-ui
 import { Editor } from '@html-editor/editor-ui';
 
 function App() {
-  return (
-    <Editor
-      initialHtml="<div><h1>Hello World</h1></div>"
-      debounceMs={75}
-      splitRatio={0.5}
-    />
-  );
+  return <Editor initialHtml="<div><h1>Hello World</h1></div>" debounceMs={75} splitRatio={0.5} />;
 }
 ```
 
@@ -88,13 +82,7 @@ function App() {
 import { useEditorStore } from '@html-editor/editor-ui';
 
 function CustomComponent() {
-  const {
-    htmlContent,
-    ast,
-    selectedNodeId,
-    updateHtml,
-    selectNode,
-  } = useEditorStore();
+  const { htmlContent, ast, selectedNodeId, updateHtml, selectNode } = useEditorStore();
 
   // Your custom logic here
 }
@@ -103,13 +91,7 @@ function CustomComponent() {
 ## Core AST Usage
 
 ```typescript
-import {
-  parseHtml,
-  toHtmlSync,
-  assignIds,
-  normalize,
-  buildIndexMaps,
-} from '@html-editor/core-ast';
+import { parseHtml, toHtmlSync, assignIds, normalize, buildIndexMaps } from '@html-editor/core-ast';
 
 // Parse HTML
 const tree = parseHtml('<div><p>Hello</p></div>');
@@ -149,11 +131,10 @@ import { usePerformanceMonitor } from '@html-editor/editor-ui';
 
 function PerformanceDisplay() {
   const metrics = usePerformanceMonitor(true);
-  
+
   return (
     <div>
-      Parse time: {metrics.parseTime.toFixed(2)}ms
-      Node count: {metrics.nodeCount}
+      Parse time: {metrics.parseTime.toFixed(2)}ms Node count: {metrics.nodeCount}
     </div>
   );
 }
@@ -171,7 +152,7 @@ const initialHtml = `
 </article>
 `;
 
-<Editor initialHtml={initialHtml} />
+<Editor initialHtml={initialHtml} />;
 ```
 
 ### Split Ratio Adjustment
@@ -194,7 +175,7 @@ import { useEditorStore } from '@html-editor/editor-ui';
 
 function ErrorHandler() {
   const { error, clearError } = useEditorStore();
-  
+
   if (error) {
     console.error('Parse error:', error);
     // Handle error
@@ -265,12 +246,12 @@ html-editor/
 
 ## Performance Targets
 
-| Metric | Target | Typical |
-|--------|--------|---------|
-| Parse latency | <100ms | 50-75ms |
-| Update latency | <100ms | 50-75ms |
-| Document size | 500 nodes | ✅ Tested |
-| Memory usage | <100KB | ~65KB |
+| Metric         | Target    | Typical   |
+| -------------- | --------- | --------- |
+| Parse latency  | <100ms    | 50-75ms   |
+| Update latency | <100ms    | 50-75ms   |
+| Document size  | 500 nodes | ✅ Tested |
+| Memory usage   | <100KB    | ~65KB     |
 
 All targets met! ✅
 

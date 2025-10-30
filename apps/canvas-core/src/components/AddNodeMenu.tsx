@@ -11,10 +11,10 @@ interface AddNodeMenuProps {
 export function AddNodeMenu({ parentId, index }: AddNodeMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
   const { addNode } = useEditorStore();
-  
+
   const handleAddNode = (type: string) => {
     let node: ASTNode;
-    
+
     switch (type) {
       case 'section':
         node = {
@@ -115,18 +115,15 @@ export function AddNodeMenu({ parentId, index }: AddNodeMenuProps) {
       default:
         return;
     }
-    
+
     addNode(node, parentId, index);
     setIsOpen(false);
   };
-  
+
   return (
     <div className="add-node-menu">
       {!isOpen ? (
-        <button
-          className="add-node-button"
-          onClick={() => setIsOpen(true)}
-        >
+        <button className="add-node-button" onClick={() => setIsOpen(true)}>
           + Add Element
         </button>
       ) : (
@@ -150,10 +147,7 @@ export function AddNodeMenu({ parentId, index }: AddNodeMenuProps) {
             <button onClick={() => handleAddNode('list-ul')}>Unordered List</button>
             <button onClick={() => handleAddNode('list-ol')}>Ordered List</button>
           </div>
-          <button
-            className="close-menu"
-            onClick={() => setIsOpen(false)}
-          >
+          <button className="close-menu" onClick={() => setIsOpen(false)}>
             Cancel
           </button>
         </div>

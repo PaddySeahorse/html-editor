@@ -9,6 +9,7 @@ Successfully implemented real-time bidirectional linkage between Monaco editor a
 ### 1. State Management (`packages/editor-ui/src/store/`)
 
 #### `editorStore.ts`
+
 - ✅ Zustand-based global state management
 - ✅ AST as central source of truth
 - ✅ Real-time HTML content synchronization
@@ -18,6 +19,7 @@ Successfully implemented real-time bidirectional linkage between Monaco editor a
 - ✅ Index maps for fast lookups
 
 **State Shape:**
+
 ```typescript
 {
   htmlContent: string;
@@ -31,6 +33,7 @@ Successfully implemented real-time bidirectional linkage between Monaco editor a
 ```
 
 **Actions:**
+
 - `updateHtml(html)` - Parse and update AST from HTML
 - `updateAst(ast)` - Serialize and update HTML from AST
 - `selectNode(id)` - Select/deselect nodes
@@ -42,6 +45,7 @@ Successfully implemented real-time bidirectional linkage between Monaco editor a
 ### 2. Code → AST → Canvas Pipeline
 
 #### Monaco Editor Integration (`components/MonacoEditor.tsx`)
+
 - ✅ Debounced change detection (configurable 50-100ms)
 - ✅ Automatic AST parsing on content change
 - ✅ Real-time syntax highlighting
@@ -51,6 +55,7 @@ Successfully implemented real-time bidirectional linkage between Monaco editor a
 - ✅ Undo/Redo command hooks prepared
 
 **Flow:**
+
 1. User types in Monaco
 2. Change debounced (75ms default)
 3. `updateHtml()` triggered
@@ -61,6 +66,7 @@ Successfully implemented real-time bidirectional linkage between Monaco editor a
 8. Selective updates applied
 
 **Performance:**
+
 - Debounce prevents excessive parsing
 - AST updates typically <50ms for 300-500 node documents
 - Monaco decorations updated efficiently
@@ -69,6 +75,7 @@ Successfully implemented real-time bidirectional linkage between Monaco editor a
 ### 3. Canvas → AST → Code Pipeline
 
 #### Visual Canvas (`components/VisualCanvas.tsx`)
+
 - ✅ Recursive AST rendering
 - ✅ Element-specific rendering (img, input, br, hr, etc.)
 - ✅ Click-to-select with propagation control
@@ -77,6 +84,7 @@ Successfully implemented real-time bidirectional linkage between Monaco editor a
 - ✅ Best-effort recovery on parse errors
 
 **Flow:**
+
 1. User clicks canvas element
 2. Node ID extracted from `data-id`
 3. `selectNode()` triggered
@@ -84,6 +92,7 @@ Successfully implemented real-time bidirectional linkage between Monaco editor a
 5. Code range highlighted
 
 **Rendering:**
+
 - Each AST node mapped to React component
 - Inline styles for selection feedback
 - Hover effects for better UX
@@ -92,6 +101,7 @@ Successfully implemented real-time bidirectional linkage between Monaco editor a
 ### 4. Selection Mapping (`utils/selectionMapper.ts`)
 
 #### Bidirectional Position Mapping
+
 - ✅ `offsetToLineColumn()` - Offset to line/column conversion
 - ✅ `lineColumnToOffset()` - Line/column to offset conversion
 - ✅ `getNodeRange()` - Node ID to code range
@@ -99,6 +109,7 @@ Successfully implemented real-time bidirectional linkage between Monaco editor a
 - ✅ `findNodeAtOffset()` - Text offset to node ID
 
 **Algorithms:**
+
 - O(n) line scanning for position conversion
 - O(1) node lookup via index maps
 - Handles multi-line elements
@@ -107,18 +118,21 @@ Successfully implemented real-time bidirectional linkage between Monaco editor a
 ### 5. Performance Optimization
 
 #### Debouncing (`utils/debounce.ts`)
+
 - ✅ Configurable delay (default 75ms)
 - ✅ Timer reset on rapid changes
 - ✅ Latest value captured
 - ✅ Memory cleanup
 
 #### Performance Monitoring (`hooks/usePerformanceMonitor.ts`)
+
 - ✅ Parse time tracking
 - ✅ Node count tracking
 - ✅ Warnings for >100ms operations
 - ✅ Automatic performance logging
 
 **Metrics:**
+
 - Parse time: typically 15-30ms for 300 nodes
 - Render time: <10ms for incremental updates
 - Total latency: 50-75ms (well under 100ms target)
@@ -127,6 +141,7 @@ Successfully implemented real-time bidirectional linkage between Monaco editor a
 ### 6. Error Handling
 
 #### Non-blocking Error Display (`components/ErrorBanner.tsx`)
+
 - ✅ Fixed position banner
 - ✅ Dismissible errors
 - ✅ Preserves last valid AST
@@ -134,6 +149,7 @@ Successfully implemented real-time bidirectional linkage between Monaco editor a
 - ✅ Parse errors shown but don't block editing
 
 **Error Scenarios Handled:**
+
 - Invalid/malformed HTML (parser auto-corrects most)
 - Unclosed tags (fragment mode handles)
 - AST serialization errors (caught and logged)
@@ -144,6 +160,7 @@ Successfully implemented real-time bidirectional linkage between Monaco editor a
 #### 21 Tests Across 3 Suites (All Passing)
 
 **editorStore.test.ts** (9 tests)
+
 - State initialization
 - HTML update and parsing
 - ID assignment
@@ -153,6 +170,7 @@ Successfully implemented real-time bidirectional linkage between Monaco editor a
 - Initialization
 
 **selectionMapper.test.ts** (8 tests)
+
 - Offset ↔ line/column conversion
 - Round-trip accuracy
 - Node range calculation
@@ -160,6 +178,7 @@ Successfully implemented real-time bidirectional linkage between Monaco editor a
 - Edge case handling
 
 **debounce.test.ts** (4 tests)
+
 - Function call debouncing
 - Timer reset
 - Latest arguments captured
@@ -168,6 +187,7 @@ Successfully implemented real-time bidirectional linkage between Monaco editor a
 ### 8. Demo Application
 
 #### Vite + React Demo (`demo/`)
+
 - ✅ Full-featured demo app
 - ✅ Sample HTML document with rich content
 - ✅ Split-pane layout (60/40 code/canvas)
@@ -175,6 +195,7 @@ Successfully implemented real-time bidirectional linkage between Monaco editor a
 - ✅ Interactive example
 
 **Features Demonstrated:**
+
 - Real-time code ↔ canvas sync
 - Selection mapping both directions
 - Error recovery
@@ -192,17 +213,20 @@ Successfully implemented real-time bidirectional linkage between Monaco editor a
 ## Acceptance Criteria Status
 
 ### ✅ Typing in Monaco Updates Canvas (<100ms latency)
+
 - **Measured**: 50-75ms average for 300-500 node documents
 - **Method**: Debounced parsing (75ms) + parse (~20ms) + render (<10ms)
 - **Result**: Consistently under 100ms target
 
 ### ✅ Selection Mapping (Canvas ↔ Code)
+
 - **Canvas to Code**: Click element → highlight code range ✓
 - **Code to Canvas**: Position cursor → highlight element ✓
 - **Accuracy**: Exact range matching via position data
 - **Visual Feedback**: Monaco decorations + canvas borders
 
 ### ✅ Undo/Redo Hooks Connected
+
 - **Monaco Commands**: Ctrl+Z and Ctrl+Shift+Z registered
 - **Store Integration**: Ready for history middleware
 - **Note**: Full history stack deferred to next task as specified
@@ -253,14 +277,14 @@ Monaco decoration              Canvas highlight
 
 ### Benchmarks (300 node document)
 
-| Operation | Time | Target | Status |
-|-----------|------|--------|--------|
-| Parse HTML | 18ms | <50ms | ✅ |
-| Assign IDs | 5ms | <20ms | ✅ |
-| Normalize | 3ms | <20ms | ✅ |
-| Build maps | 2ms | <10ms | ✅ |
-| Serialize | 8ms | <30ms | ✅ |
-| **Total** | **36ms** | **<100ms** | ✅ |
+| Operation  | Time     | Target     | Status |
+| ---------- | -------- | ---------- | ------ |
+| Parse HTML | 18ms     | <50ms      | ✅     |
+| Assign IDs | 5ms      | <20ms      | ✅     |
+| Normalize  | 3ms      | <20ms      | ✅     |
+| Build maps | 2ms      | <10ms      | ✅     |
+| Serialize  | 8ms      | <30ms      | ✅     |
+| **Total**  | **36ms** | **<100ms** | ✅     |
 
 ### Scalability
 
@@ -297,27 +321,35 @@ Monaco decoration              Canvas highlight
 ## Key Components
 
 ### `<Editor>`
+
 Main component combining Monaco + Canvas
+
 - Split-pane layout
 - Error banner integration
 - Configurable split ratio
 
 ### `<MonacoEditor>`
+
 Code editor with AST sync
+
 - Debounced updates
 - Selection tracking
 - Syntax highlighting
 - Command registration
 
 ### `<VisualCanvas>`
+
 AST renderer
+
 - Recursive node rendering
 - Click-to-select
 - Selection highlighting
 - Element-specific rendering
 
 ### `useEditorStore`
+
 Global state management
+
 - AST storage
 - Sync operations
 - Error handling
@@ -326,6 +358,7 @@ Global state management
 ## Dependencies
 
 ### Production
+
 - `@monaco-editor/react`: ^4.6.0 (Monaco wrapper)
 - `monaco-editor`: ^0.45.0 (Code editor)
 - `react`: ^18.2.0
@@ -334,6 +367,7 @@ Global state management
 - `@html-editor/core-ast`: file:../core-ast
 
 ### Development
+
 - `@types/react`: ^18.2.0
 - `@types/react-dom`: ^18.2.0
 - `typescript`: ^5.3.0

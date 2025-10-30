@@ -91,6 +91,7 @@ Parses HTML string into a HAST root node with position information.
 ### `toHtml(root: Root, options?: ToHtmlOptions): Promise<string>`
 
 Serializes HAST to HTML string. Options:
+
 - `format?: boolean` - Format output with Prettier
 
 ### `toHtmlSync(root: Root): string`
@@ -104,6 +105,7 @@ Assigns stable `data-id` to all element nodes. IDs are preserved when already pr
 ### `buildIndexMaps(root: Root): NodeIndexMap`
 
 Creates index maps for fast node lookups:
+
 - `byId: Map<string, Element>` - Map from data-id to node
 - `byTextRange: Map<string, { start, end }>` - Map from data-id to text offsets
 
@@ -114,6 +116,7 @@ Finds an element node by its `data-id`.
 ### `normalize(root: Root): Root`
 
 Normalizes the AST by:
+
 - Removing empty text nodes
 - Merging adjacent text nodes
 - Unwrapping redundant spans without attributes

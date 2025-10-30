@@ -7,6 +7,7 @@ A production-ready HTML editor with real-time bidirectional sync between code an
 ## Completed Milestones
 
 ### ✅ Milestone 1: AST Core (Simplified)
+
 - **Status**: Complete
 - **Tests**: 49 passing
 - **Package**: `@html-editor/core-ast`
@@ -20,6 +21,7 @@ A production-ready HTML editor with real-time bidirectional sync between code an
 - **Details**: [IMPLEMENTATION.md](./IMPLEMENTATION.md)
 
 ### ✅ Milestone 2: Real-time Editor Linkage
+
 - **Status**: Complete
 - **Tests**: 28 passing
 - **Package**: `@html-editor/editor-ui`
@@ -59,26 +61,27 @@ A production-ready HTML editor with real-time bidirectional sync between code an
 
 ## Test Coverage
 
-| Package | Test Files | Tests | Status |
-|---------|------------|-------|--------|
-| core-ast | 7 | 49 | ✅ All passing |
-| editor-ui | 4 | 28 | ✅ All passing |
-| **Total** | **11** | **77** | **✅ All passing** |
+| Package   | Test Files | Tests  | Status             |
+| --------- | ---------- | ------ | ------------------ |
+| core-ast  | 7          | 49     | ✅ All passing     |
+| editor-ui | 4          | 28     | ✅ All passing     |
+| **Total** | **11**     | **77** | **✅ All passing** |
 
 ## Performance Benchmarks
 
 ### Target: <100ms latency for typical edits
 
-| Operation | Target | Actual | Status |
-|-----------|--------|--------|--------|
-| Parse HTML (300 nodes) | <50ms | ~18ms | ✅ 64% faster |
-| Assign IDs | <20ms | ~5ms | ✅ 75% faster |
-| Normalize AST | <20ms | ~3ms | ✅ 85% faster |
-| Build index maps | <10ms | ~2ms | ✅ 80% faster |
-| Serialize to HTML | <30ms | ~8ms | ✅ 73% faster |
-| **Total Pipeline** | **<100ms** | **~36ms** | **✅ 64% faster** |
+| Operation              | Target     | Actual    | Status            |
+| ---------------------- | ---------- | --------- | ----------------- |
+| Parse HTML (300 nodes) | <50ms      | ~18ms     | ✅ 64% faster     |
+| Assign IDs             | <20ms      | ~5ms      | ✅ 75% faster     |
+| Normalize AST          | <20ms      | ~3ms      | ✅ 85% faster     |
+| Build index maps       | <10ms      | ~2ms      | ✅ 80% faster     |
+| Serialize to HTML      | <30ms      | ~8ms      | ✅ 73% faster     |
+| **Total Pipeline**     | **<100ms** | **~36ms** | **✅ 64% faster** |
 
 ### With Debouncing
+
 - Debounce delay: 75ms (configurable)
 - Total perceived latency: 50-75ms
 - Well under 100ms target ✅
@@ -86,30 +89,35 @@ A production-ready HTML editor with real-time bidirectional sync between code an
 ## Key Features
 
 ### 1. Real-time Synchronization
+
 - **Code → AST → Canvas**: Automatic parsing and rendering
 - **Canvas → AST → Code**: Selection updates and code generation
 - **Debounced**: Prevents excessive parsing (50-100ms)
 - **Selective Updates**: Only changed nodes re-rendered when possible
 
 ### 2. Selection Mapping
+
 - **Click canvas node** → Highlight code range in Monaco
 - **Position cursor in code** → Highlight element in canvas
 - **Bidirectional**: Works in both directions simultaneously
 - **Accurate**: Uses position data from parser
 
 ### 3. Node Identity
+
 - Stable `data-id` attributes on all elements
 - Preserved across non-structural edits
 - Enables efficient updates
 - O(1) node lookup via index maps
 
 ### 4. Error Handling
+
 - **Non-blocking UI**: Error banner doesn't prevent editing
 - **Best-effort recovery**: Parser is permissive
 - **Graceful degradation**: Shows last valid state
 - **User-friendly**: Dismissible error messages
 
 ### 5. Performance Optimization
+
 - Debounced parsing
 - Selective canvas updates
 - Index maps for O(1) lookups
@@ -204,27 +212,32 @@ function App() {
 ## Technology Stack
 
 ### Core
+
 - **TypeScript**: Type safety
 - **Unified/Rehype**: HTML parsing
 - **HAST**: Standard AST format
 
 ### UI
+
 - **React 18**: Component framework
 - **Monaco Editor**: Code editor (VS Code)
 - **Zustand**: State management
 - **Vite**: Build tool
 
 ### Testing
+
 - **Vitest**: Test runner
 - **Happy-dom**: Test environment
 
 ### Development
+
 - **Turbo**: Monorepo orchestration
 - **npm workspaces**: Package management
 
 ## Next Steps
 
 ### Planned Enhancements
+
 1. **History Stack**: Full undo/redo with operation tracking
 2. **Incremental Parsing**: Only reparse changed subtrees
 3. **Virtual Scrolling**: Handle very large documents
@@ -238,18 +251,19 @@ function App() {
 
 ### ✅ All Criteria Met
 
-| Criteria | Target | Actual | Status |
-|----------|--------|--------|--------|
-| Typing latency | <100ms | 50-75ms | ✅ |
-| Selection mapping | Both directions | ✓ Both | ✅ |
-| Undo/Redo hooks | Connected | ✓ Ready | ✅ |
-| Error handling | Non-blocking | ✓ Banner | ✅ |
-| Test coverage | Comprehensive | 77 tests | ✅ |
-| Documentation | Complete | ✓ Full | ✅ |
+| Criteria          | Target          | Actual   | Status |
+| ----------------- | --------------- | -------- | ------ |
+| Typing latency    | <100ms          | 50-75ms  | ✅     |
+| Selection mapping | Both directions | ✓ Both   | ✅     |
+| Undo/Redo hooks   | Connected       | ✓ Ready  | ✅     |
+| Error handling    | Non-blocking    | ✓ Banner | ✅     |
+| Test coverage     | Comprehensive   | 77 tests | ✅     |
+| Documentation     | Complete        | ✓ Full   | ✅     |
 
 ## Dependencies
 
 ### Production
+
 - `unified`: ^11.0.4
 - `rehype-parse`: ^9.0.0
 - `hast-util-to-html`: ^9.0.0
@@ -262,6 +276,7 @@ function App() {
 - `react-dom`: ^18.2.0
 
 ### Development
+
 - `typescript`: ^5.3.0
 - `vitest`: ^1.0.4
 - `turbo`: ^1.11.0
@@ -276,6 +291,7 @@ See [LICENSE](./LICENSE) file.
 ## Contributors
 
 Built as a demonstration of:
+
 - AST-based editing
 - Real-time synchronization
 - Performance optimization

@@ -26,7 +26,7 @@ export function Editor({
       }}
     >
       <ErrorBanner />
-      
+
       <div
         style={{
           width: leftWidth,

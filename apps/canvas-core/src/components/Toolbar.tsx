@@ -2,7 +2,7 @@ import { useEditorStore } from '../store/editorStore';
 
 export function Toolbar() {
   const { undo, redo, canUndo, canRedo } = useEditorStore();
-  
+
   return (
     <div className="toolbar">
       <div className="toolbar-section">

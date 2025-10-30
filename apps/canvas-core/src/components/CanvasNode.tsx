@@ -24,28 +24,23 @@ export function CanvasNode({ node }: CanvasNodeProps) {
     duplicateNodeById,
     updateNodeById,
   } = useEditorStore();
-  
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({ id: node.id });
-  
+
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: node.id,
+  });
+
   const contentRef = useRef<HTMLDivElement>(null);
-  
+
   const isSelected = selectedNodeId === node.id;
   const isHovered = hoveredNodeId === node.id;
   const isEditing = editingNodeId === node.id;
-  
+
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
     opacity: isDragging ? 0.5 : 1,
   };
-  
+
   useEffect(() => {
     if (isEditing && contentRef.current) {
       contentRef.current.focus();
@@ -57,19 +52,19 @@ export function CanvasNode({ node }: CanvasNodeProps) {
       sel?.addRange(range);
     }
   }, [isEditing]);
-  
+
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     setSelectedNode(node.id);
   };
-  
+
   const handleDoubleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (node.type === 'text' || node.type === 'heading') {
       setEditingNode(node.id);
     }
   };
-  
+
   const handleBlur = () => {
     if (isEditing && contentRef.current) {
       const newContent = contentRef.current.textContent || '';
@@ -79,7 +74,7 @@ export function CanvasNode({ node }: CanvasNodeProps) {
       setEditingNode(null);
     }
   };
-  
+
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
@@ -92,17 +87,17 @@ export function CanvasNode({ node }: CanvasNodeProps) {
       }
     }
   };
-  
+
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation();
     deleteNodeById(node.id);
   };
-  
+
   const handleDuplicate = (e: React.MouseEvent) => {
     e.stopPropagation();
     duplicateNodeById(node.id);
   };
-  
+
   const renderContent = () => {
     if (node.type === 'image') {
       return (
@@ -113,7 +108,7 @@ export function CanvasNode({ node }: CanvasNodeProps) {
         />
       );
     }
-    
+
     if (node.type === 'text' || node.type === 'heading') {
       return (
         <div
@@ -133,7 +128,7 @@ export function CanvasNode({ node }: CanvasNodeProps) {
         </div>
       );
     }
-    
+
     if (node.type === 'link') {
       return (
         <a href={node.href} onClick={(e) => e.preventDefault()}>
@@ -141,7 +136,7 @@ export function CanvasNode({ node }: CanvasNodeProps) {
         </a>
       );
     }
-    
+
     if (node.type === 'list' && node.children) {
       const ListTag = node.tag;
       return (
@@ -152,11 +147,11 @@ export function CanvasNode({ node }: CanvasNodeProps) {
         </ListTag>
       );
     }
-    
+
     if (node.type === 'listItem') {
       return <span>{node.content}</span>;
     }
-    
+
     if ((node.type === 'section' || node.type === 'container') && node.children) {
       return (
         <>
@@ -169,10 +164,10 @@ export function CanvasNode({ node }: CanvasNodeProps) {
         </>
       );
     }
-    
+
     return null;
   };
-  
+
   const getNodeLabel = () => {
     const labels: Record<string, string> = {
       section: 'Section',
@@ -186,7 +181,7 @@ export function CanvasNode({ node }: CanvasNodeProps) {
     };
     return labels[node.type] || node.type;
   };
-  
+
   return (
     <div
       ref={setNodeRef}
@@ -202,13 +197,15 @@ export function CanvasNode({ node }: CanvasNodeProps) {
       <div className="node-header">
         <span className="node-label">{getNodeLabel()}</span>
         <div className="node-actions">
-          <button onClick={handleDuplicate} title="Duplicate">⎘</button>
-          <button onClick={handleDelete} title="Delete">×</button>
+          <button onClick={handleDuplicate} title="Duplicate">
+            ⎘
+          </button>
+          <button onClick={handleDelete} title="Delete">
+            ×
+          </button>
         </div>
       </div>
-      <div className="node-body">
-        {renderContent()}
-      </div>
+      <div className="node-body">{renderContent()}</div>
     </div>
   );
 }

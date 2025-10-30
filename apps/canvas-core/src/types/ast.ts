@@ -1,4 +1,4 @@
-export type NodeType = 
+export type NodeType =
   | 'section'
   | 'container'
   | 'text'

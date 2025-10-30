@@ -39,8 +39,8 @@ export function findParentNode(
 
 export function deleteNode(nodes: ASTNode[], id: string): ASTNode[] {
   return nodes
-    .filter(node => node.id !== id)
-    .map(node => {
+    .filter((node) => node.id !== id)
+    .map((node) => {
       if (node.children) {
         return {
           ...node,
@@ -51,12 +51,8 @@ export function deleteNode(nodes: ASTNode[], id: string): ASTNode[] {
     });
 }
 
-export function updateNode(
-  nodes: ASTNode[],
-  id: string,
-  updates: Partial<ASTNode>
-): ASTNode[] {
-  return nodes.map(node => {
+export function updateNode(nodes: ASTNode[], id: string, updates: Partial<ASTNode>): ASTNode[] {
+  return nodes.map((node) => {
     if (node.id === id) {
       return { ...node, ...updates } as ASTNode;
     }
@@ -93,7 +89,7 @@ export function insertNode(
     return [...nodes, newNode];
   }
 
-  return nodes.map(node => {
+  return nodes.map((node) => {
     if (node.id === parentId && node.children) {
       const newChildren = [...node.children];
       if (index !== undefined) {
@@ -133,14 +129,14 @@ export function canAcceptChildren(node: ASTNode): boolean {
 
 export function isValidChildFor(parent: ASTNode | null, child: ASTNode): boolean {
   if (!parent) return true;
-  
+
   if (parent.type === 'list') {
     return child.type === 'listItem';
   }
-  
+
   if (parent.type === 'section' || parent.type === 'container') {
     return child.type !== 'listItem';
   }
-  
+
   return false;
 }

@@ -7,7 +7,7 @@ import './App.css';
 
 function App() {
   const { undo, redo } = useEditorStore();
-  
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {
@@ -19,11 +19,11 @@ function App() {
         redo();
       }
     };
-    
+
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [undo, redo]);
-  
+
   return (
     <div className="app">
       <Toolbar />

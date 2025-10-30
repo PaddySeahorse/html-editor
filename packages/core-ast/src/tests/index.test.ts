@@ -1,5 +1,10 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { parse, toHtml, addIds, resetIdCounter } from '../index';
+import {
+  parseHtml as parse,
+  toHtmlSync as toHtml,
+  assignIds as addIds,
+  resetIdCounter,
+} from '../index';
 
 describe('core-ast', () => {
   beforeEach(() => {

@@ -18,7 +18,7 @@ export interface EditorState {
   error: string | null;
   isProcessing: boolean;
   cursorPosition: { line: number; column: number } | null;
-  
+
   updateHtml: (html: string) => void;
   updateAst: (ast: Root) => void;
   selectNode: (nodeId: string | null) => void;
@@ -39,13 +39,13 @@ export const useEditorStore = create<EditorState>((set, get) => ({
 
   updateHtml: (html: string) => {
     set({ isProcessing: true, error: null });
-    
+
     try {
       const ast = parseHtml(html);
       assignIds(ast);
       normalize(ast);
       const indexMaps = buildIndexMaps(ast);
-      
+
       set({
         htmlContent: html,
         ast,
@@ -64,7 +64,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     try {
       const html = toHtmlSync(ast);
       const indexMaps = buildIndexMaps(ast);
-      
+
       set({
         ast,
         htmlContent: html,

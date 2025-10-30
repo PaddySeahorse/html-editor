@@ -45,7 +45,7 @@ describe('debounce', () => {
 
     debouncedFn();
     vi.advanceTimersByTime(50);
-    
+
     debouncedFn();
     vi.advanceTimersByTime(50);
 

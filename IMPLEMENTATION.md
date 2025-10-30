@@ -18,17 +18,20 @@ Successfully implemented a minimal, robust HTML AST pipeline as the single sourc
 ### 2. Core Functionality
 
 #### Parsing (`src/parse.ts`)
+
 - ✅ `parseHtml(html: string) -> HAST Root` with position info
 - ✅ Uses unified + rehype-parse
 - ✅ Fragment mode for flexible HTML parsing
 
 #### Serialization (`src/serialize.ts`)
+
 - ✅ `toHtml(root: HAST) -> string` async with formatting support
 - ✅ `toHtmlSync(root: HAST) -> string` synchronous version
 - ✅ Uses hast-util-to-html
 - ✅ Optional Prettier formatting via plugin-html
 
 #### Node Identity (`src/identity.ts`)
+
 - ✅ `assignIds(root)` - Assigns stable data-id to element nodes
 - ✅ `buildIndexMaps(root)` - Creates:
   - `byId: Map<string, Element>` for node lookup
@@ -37,12 +40,14 @@ Successfully implemented a minimal, robust HTML AST pipeline as the single sourc
 - ✅ `resetIdCounter()` - Reset for testing
 
 #### Normalizers (`src/normalize.ts`)
+
 - ✅ Remove empty text nodes
 - ✅ Merge adjacent text nodes
 - ✅ Unwrap redundant spans without attributes (preserves data-id)
 - ✅ Trim whitespace in block elements (safe trimming)
 
 #### Diff/Patch (`src/diff.ts`)
+
 - ✅ `replaceNodeById(root, id, newNode)` - Replace by ID
 - ✅ `applyPatch(root, id, newNode)` - Apply targeted patch
 - ✅ `detectChanges(oldRoot, newRoot)` - Detect structural changes
@@ -53,6 +58,7 @@ Successfully implemented a minimal, robust HTML AST pipeline as the single sourc
 #### Unit Tests (49 tests, all passing)
 
 **parse.test.ts** (6 tests)
+
 - Simple HTML parsing
 - Nested elements
 - Attributes (handles className array format)
@@ -61,6 +67,7 @@ Successfully implemented a minimal, robust HTML AST pipeline as the single sourc
 - Whitespace preservation
 
 **serialize.test.ts** (5 tests)
+
 - Simple serialization
 - Nested HTML
 - Attribute preservation
@@ -68,6 +75,7 @@ Successfully implemented a minimal, robust HTML AST pipeline as the single sourc
 - Synchronous mode
 
 **identity.test.ts** (7 tests)
+
 - ID assignment to all elements
 - Unique ID generation
 - Existing ID preservation
@@ -75,6 +83,7 @@ Successfully implemented a minimal, robust HTML AST pipeline as the single sourc
 - Node lookup by ID
 
 **normalize.test.ts** (6 tests)
+
 - Empty text node removal
 - Adjacent text merging
 - Redundant span unwrapping
@@ -83,6 +92,7 @@ Successfully implemented a minimal, robust HTML AST pipeline as the single sourc
 - Complex nested structures
 
 **diff.test.ts** (6 tests)
+
 - Node replacement by ID
 - Error handling for non-existent IDs
 - Patch application
@@ -90,6 +100,7 @@ Successfully implemented a minimal, robust HTML AST pipeline as the single sourc
 - No changes scenario
 
 **roundtrip.test.ts** (11 tests)
+
 - Simple HTML round-trips
 - Nested element preservation
 - Attribute preservation
@@ -103,6 +114,7 @@ Successfully implemented a minimal, robust HTML AST pipeline as the single sourc
 - Empty elements
 
 **integration.test.ts** (8 tests)
+
 - Blog post HTML
 - Form HTML with inputs
 - Navigation menus
@@ -132,17 +144,20 @@ Successfully implemented a minimal, robust HTML AST pipeline as the single sourc
 ## Acceptance Criteria Status
 
 ### ✅ Round-trip Stability
+
 - All snapshot tests pass
 - Semantically equivalent output (normalized differences allowed)
 - 11 dedicated round-trip tests + 8 integration tests
 
 ### ✅ Stable Node Identity
+
 - Each element node receives stable data-id
 - IDs preserved across non-structural edits
 - IDs not overwritten when already present
 - Fast lookup via index maps
 
 ### ✅ Tree-shakeable Build
+
 - ES module exports
 - No markdown/AI/plugin code
 - Clean dist/ output with only necessary files
@@ -167,6 +182,7 @@ Successfully implemented a minimal, robust HTML AST pipeline as the single sourc
 ## Dependencies
 
 **Production:**
+
 - unified: ^11.0.4 (AST processor)
 - rehype-parse: ^9.0.0 (HTML parser)
 - hast-util-to-html: ^9.0.0 (HTML serializer)
@@ -174,6 +190,7 @@ Successfully implemented a minimal, robust HTML AST pipeline as the single sourc
 - prettier: ^3.1.0 (Formatting)
 
 **Development:**
+
 - typescript: ^5.3.0
 - vitest: ^1.0.4
 - @types/hast: ^3.0.3
@@ -195,12 +212,15 @@ The core AST package is complete and production-ready for V1. All acceptance cri
 # Canvas Editing Core Features - Implementation
 
 ## Overview
+
 This implementation provides a complete visual HTML editor with canvas and code views, featuring drag-and-drop editing, undo/redo history, and real-time synchronization.
 
 ## Features Implemented
 
 ### 1. Node Types
+
 All required node types are fully implemented with TypeScript types in `src/types/ast.ts`:
+
 - **Section**: Container element (section/div tag)
 - **Container**: Generic div container
 - **Text**: Paragraph or span elements with editable content
@@ -213,33 +233,39 @@ All required node types are fully implemented with TypeScript types in `src/type
 ### 2. Operations
 
 #### Add
+
 - Interactive `AddNodeMenu` component provides a dropdown menu to add new elements
 - Menu is context-aware and appears at appropriate insertion points
 - Supports adding all node types with sensible defaults
 
 #### Delete
+
 - Delete button (×) in node header
 - Removes node and all children from the AST
 - Updates both views immediately
 
 #### Move (Drag and Drop)
+
 - Implemented using `@dnd-kit/core` and `@dnd-kit/sortable`
 - Visual feedback during drag (overlay, opacity changes)
 - Supports reordering within parent and moving between containers
 - 8px activation distance to prevent accidental drags
 
 #### Duplicate
+
 - Duplicate button (⎘) in node header
 - Recursively clones node with new unique IDs
 - Inserts copy adjacent to original
 
 #### Inline Text Editing
+
 - Double-click Text or Heading nodes to enable contentEditable
 - Enter to save, Escape to cancel
 - Visual outline when editing (blue border)
 - Text sanitization on save
 
 #### Attribute Editing
+
 - Inline toolbar appears when node is selected
 - **Links**: Edit href attribute
 - **Images**: Edit src and alt attributes
@@ -250,16 +276,19 @@ All required node types are fully implemented with TypeScript types in `src/type
 The history system is integrated into the Zustand store (`src/store/editorStore.ts`):
 
 #### Undo/Redo Stack
+
 - Maintains separate `past` and `future` arrays of AST snapshots
 - Keyboard shortcuts: Ctrl+Z (undo), Ctrl+Y or Ctrl+Shift+Z (redo)
 - Toolbar buttons show enabled/disabled state
 
 #### Edit Coalescing
+
 - Rapid edits within 500ms are coalesced into a single history entry
 - Prevents history pollution from typing
 - Configurable `coalesceDelay` parameter
 
 #### Behavior
+
 - All operations push to history before executing
 - Undo/redo works across both canvas and code views
 - Making a new change clears the future (redo) stack
@@ -267,21 +296,25 @@ The history system is integrated into the Zustand store (`src/store/editorStore.
 ### 4. Visual Cues
 
 #### Selection
+
 - Selected nodes have blue border and light blue background
 - Single selection model (one node at a time)
 - Click to select, click elsewhere to deselect
 
 #### Hover States
+
 - Nodes show lighter blue border on hover
 - Helps identify clickable areas
 - Hover state is tracked in store
 
 #### Drop Targets
+
 - dnd-kit provides visual feedback for valid drop targets
 - Drag overlay shows what's being dragged
 - Insertion indicators show where element will be placed
 
 #### Inline Toolbar
+
 - Fixed position at bottom center of screen
 - Shows selected node type
 - Contains attribute editing controls
@@ -290,17 +323,20 @@ The history system is integrated into the Zustand store (`src/store/editorStore.
 ### 5. Synchronization
 
 #### Canvas → Code
+
 - AST changes immediately trigger HTML serialization via `astToHtml()`
 - Code view updates to reflect canvas changes
 - Indented HTML output for readability
 
 #### Code → Canvas
+
 - Code editor updates on blur
 - HTML parsed back to AST via `htmlToAst()`
 - Uses browser's DOMParser API
 - Gracefully handles invalid HTML
 
 #### Both Ways
+
 - Single source of truth: the AST in Zustand store
 - Both views are reactive subscribers to the same state
 - No data duplication or sync conflicts
@@ -308,17 +344,20 @@ The history system is integrated into the Zustand store (`src/store/editorStore.
 ## Architecture
 
 ### State Management
+
 - **Zustand store**: Single centralized state
 - **Immutable updates**: All operations return new AST
 - **Pure functions**: AST utilities have no side effects
 
 ### AST Design
+
 - Each node has unique string ID
 - Nodes are discriminated unions by `type` field
 - Type-safe with TypeScript
 - Supports hierarchical structures (children arrays)
 
 ### Component Structure
+
 ```
 App
 ├── Toolbar (undo/redo buttons)
@@ -335,6 +374,7 @@ App
 ```
 
 ### Utilities
+
 - **ast.ts**: Node manipulation (find, insert, delete, update, move, duplicate)
 - **html.ts**: Serialization and parsing (AST ↔ HTML)
 - **sanitize.ts**: HTML sanitization using DOMPurify
@@ -349,8 +389,9 @@ App
 ## Limitations (V1)
 
 As specified in the ticket:
+
 - No plugin system
-- No AI features  
+- No AI features
 - No markdown support
 - Tables will render in HTML view but are not editable in canvas
 - No custom components
@@ -392,6 +433,7 @@ All checks pass successfully! ✓
 ## Future Enhancements (Not in V1)
 
 The architecture supports future additions:
+
 - Tables editing
 - Custom components
 - Plugin system

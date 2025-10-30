@@ -8,11 +8,7 @@ export interface SyncOptions {
 }
 
 export function useEditorSync(options: SyncOptions = {}) {
-  const {
-    onAstUpdate,
-    onSelectionChange,
-    performanceThreshold = 100,
-  } = options;
+  const { onAstUpdate, onSelectionChange, performanceThreshold = 100 } = options;
 
   const { htmlContent, selectedNodeId, ast } = useEditorStore();
   const startTimeRef = useRef<number>(0);
@@ -20,7 +16,7 @@ export function useEditorSync(options: SyncOptions = {}) {
   useEffect(() => {
     if (ast && startTimeRef.current > 0) {
       const elapsed = performance.now() - startTimeRef.current;
-      
+
       if (elapsed > performanceThreshold) {
         console.warn(
           `AST update took ${elapsed.toFixed(2)}ms (threshold: ${performanceThreshold}ms)`

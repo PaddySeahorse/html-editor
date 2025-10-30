@@ -7,7 +7,7 @@ describe('toHtml', () => {
     const html = '<div>Hello World</div>';
     const tree = parseHtml(html);
     const result = await toHtml(tree);
-    
+
     expect(result).toContain('Hello World');
     expect(result).toContain('div');
   });
@@ -16,7 +16,7 @@ describe('toHtml', () => {
     const html = '<div><p>Hello <strong>World</strong></p></div>';
     const tree = parseHtml(html);
     const result = await toHtml(tree);
-    
+
     expect(result).toContain('strong');
     expect(result).toContain('World');
   });
@@ -25,7 +25,7 @@ describe('toHtml', () => {
     const html = '<div class="container" id="main">Content</div>';
     const tree = parseHtml(html);
     const result = await toHtml(tree);
-    
+
     expect(result).toContain('class="container"');
     expect(result).toContain('id="main"');
   });
@@ -34,7 +34,7 @@ describe('toHtml', () => {
     const html = '<div><p>Test</p></div>';
     const tree = parseHtml(html);
     const result = await toHtml(tree, { format: true });
-    
+
     expect(result).toContain('\n');
   });
 
@@ -42,7 +42,7 @@ describe('toHtml', () => {
     const html = '<div>Hello World</div>';
     const tree = parseHtml(html);
     const result = toHtmlSync(tree);
-    
+
     expect(result).toContain('Hello World');
     expect(result).toContain('div');
   });

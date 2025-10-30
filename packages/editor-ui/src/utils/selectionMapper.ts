@@ -37,11 +37,7 @@ export function offsetToLineColumn(
   };
 }
 
-export function lineColumnToOffset(
-  content: string,
-  line: number,
-  column: number
-): number {
+export function lineColumnToOffset(content: string, line: number, column: number): number {
   const lines = content.split('\n');
   let offset = 0;
 
@@ -53,10 +49,7 @@ export function lineColumnToOffset(
   return offset;
 }
 
-export function findNodeAtOffset(
-  offset: number,
-  indexMaps: NodeIndexMap
-): string | null {
+export function findNodeAtOffset(offset: number, indexMaps: NodeIndexMap): string | null {
   for (const [nodeId, range] of indexMaps.byTextRange.entries()) {
     if (offset >= range.start && offset <= range.end) {
       return nodeId;
