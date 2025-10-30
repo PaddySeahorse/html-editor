@@ -28,6 +28,7 @@ module.exports = {
   },
   rules: {
     'react/react-in-jsx-scope': 'off',
+    'react/prop-types': 'off',
     'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
     '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
   },

@@ -21,7 +21,9 @@ export function VisualCanvas({ className = '' }: VisualCanvasProps) {
           <strong>Parse Error:</strong> {error}
           <p>Showing last valid content or best-effort recovery.</p>
         </div>
-        {ast && <CanvasContent ast={ast} selectedNodeId={selectedNodeId} onSelectNode={selectNode} />}
+        {ast && (
+          <CanvasContent ast={ast} selectedNodeId={selectedNodeId} onSelectNode={selectNode} />
+        )}
       </div>
     );
   }
@@ -79,11 +81,7 @@ function RenderNode({ node, selectedNodeId, onSelectNode }: RenderNodeProps) {
 
   if (node.type === 'element') {
     return (
-      <ElementNode
-        element={node}
-        selectedNodeId={selectedNodeId}
-        onSelectNode={onSelectNode}
-      />
+      <ElementNode element={node} selectedNodeId={selectedNodeId} onSelectNode={onSelectNode} />
     );
   }
 
@@ -125,7 +123,7 @@ function ElementNode({ element, selectedNodeId, onSelectNode }: ElementNodeProps
     position: 'relative',
   };
 
-  const props: Record<string, any> = {};
+  const props: Record<string, unknown> = {};
   if (element.properties) {
     Object.entries(element.properties).forEach(([key, value]) => {
       if (key !== 'dataId' && key !== 'className') {
@@ -150,20 +148,13 @@ function ElementNode({ element, selectedNodeId, onSelectNode }: ElementNodeProps
         className={className}
         style={style}
         onClick={handleClick}
-        alt={props.alt || 'Image'}
+        alt={(props.alt as string | undefined) || 'Image'}
       />
     );
   }
 
   if (element.tagName === 'input') {
-    return (
-      <input
-        {...props}
-        className={className}
-        style={style}
-        onClick={handleClick}
-      />
-    );
+    return <input {...props} className={className} style={style} onClick={handleClick} />;
   }
 
   if (element.tagName === 'br') {

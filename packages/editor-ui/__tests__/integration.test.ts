@@ -67,12 +67,10 @@ describe('editor integration', () => {
   it('should handle updates with preserved IDs', () => {
     const html1 = '<div><p>Original</p></div>';
     const html2 = '<div><p>Updated</p></div>';
-    
+
     const { initialize, updateHtml } = useEditorStore.getState();
 
     initialize(html1);
-    const state1 = useEditorStore.getState();
-    const ids1 = Array.from(state1.indexMaps?.byId.keys() || []);
 
     updateHtml(html2);
     const state2 = useEditorStore.getState();
@@ -96,7 +94,7 @@ describe('editor integration', () => {
     `;
 
     const { initialize } = useEditorStore.getState();
-    
+
     const startTime = performance.now();
     initialize(html);
     const endTime = performance.now();

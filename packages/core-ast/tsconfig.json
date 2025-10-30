@@ -12,6 +12,7 @@
     "declarationMap": true,
     "sourceMap": true,
     "noEmit": false,
+    "allowImportingTsExtensions": false,
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
