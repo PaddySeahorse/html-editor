@@ -4,6 +4,7 @@ node_modules/
 
 # Build outputs
 dist/
+dist-ssr/
 build/
 *.tsbuildinfo
 
@@ -18,10 +19,17 @@ playwright/.cache/
 .env
 .env.local
 .env.*.local
+*.local
 
 # IDE
 .vscode/
+!.vscode/extensions.json
 .idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
 *.swp
 *.swo
 *~
@@ -37,6 +45,7 @@ npm-debug.log*
 pnpm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+lerna-debug.log*
 
 # Temporary files
 tmp/
