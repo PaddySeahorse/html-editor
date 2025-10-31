@@ -1,7 +1,6 @@
 # HTML Editor
 
-<<<<<<< HEAD
-A modern HTML editing platform that pairs a real-time code editor with a visual canvas, all synchronized through a shared AST pipeline. The workspace is optimized for performance, testing, and developer ergonomics.
+The HTML Editor project delivers a unified editing platform that keeps a real-time code view and a visual canvas in sync via a shared HTML AST pipeline. V1 beta bundles together the productionized AST core, synchronized editor UI primitives, and two front-end workspaces (tri-pane web app and drag-and-drop canvas playground).
 
 ## Getting Started
 
@@ -19,11 +18,15 @@ pnpm install
 ### Development
 
 ```bash
-# Start the main web workspace
+# Launch the main tri-pane workspace (apps/web)
 pnpm dev
 
-# Or target specific workspaces
+# Launch the canvas playground workspace (apps/canvas)
+pnpm dev:canvas
+
+# Target a specific workspace manually
 pnpm --filter @html-editor/web dev
+pnpm --filter @html-editor/canvas dev
 pnpm --filter demo dev
 ```
 
@@ -32,191 +35,97 @@ pnpm --filter demo dev
 ```
 html-editor/
 ├── apps/
-│   └── web/                    # Main React workspace (Monaco + canvas panes)
-├── demo/                       # Lightweight showcase wired to core packages
+│   ├── web/        # Tri-pane workspace (toolbar, outline, canvas, code editor)
+│   └── canvas/     # Drag-and-drop canvas playground demo
+├── demo/           # Lightweight showcase wired to shared packages
 ├── packages/
-│   ├── core-ast/               # AST processing, diffing, and identity helpers
-│   ├── editor-ui/              # Shared editor primitives (Monaco + Canvas)
-│   └── paste/                  # Clipboard helpers for HTML/text flows
-├── .github/workflows/          # CI pipeline (lint, test, e2e)
-├── turbo.json                  # Turborepo pipeline definition
-├── pnpm-workspace.yaml         # Workspace configuration
-└── package.json                # Root scripts and tooling
+│   ├── core-ast/   # AST parsing, normalization, diffing, node identity
+│   ├── editor-ui/  # Monaco + canvas primitives backed by AST index maps
+│   └── paste/      # HTML/text clipboard utilities
+├── .github/workflows/  # CI pipeline (lint, typecheck, unit, e2e)
+├── pnpm-workspace.yaml # Workspace configuration
+├── turbo.json          # Turborepo pipeline definition
+└── package.json        # Root scripts and tooling
 ```
 
 ## Packages
 
 ### `@html-editor/core-ast`
 
-- Parse HTML into rich HAST nodes with positional data
-- Serialize HAST back to HTML with formatting controls
-- Stable node identity + index maps for selection synchronization
-- Normalizers that keep markup well-formed
-- Diff/Patch utilities for applying granular updates
+- Parse HTML into rich HAST nodes (unified + rehype-parse)
+- Serialize back to HTML with sync/async helpers and optional formatting
+- Stable node identity, index maps, and diff/patch helpers
+- Normalizers to keep markup well-formed while preserving semantics
 
-See [packages/core-ast/README.md](./packages/core-ast/README.md) for the full API.
+See [packages/core-ast/README.md](./packages/core-ast/README.md) for full API and tests.
 
 ### `@html-editor/editor-ui`
 
-- Real-time synchronization between Monaco and the visual canvas (<100ms target)
-- Bidirectional selection mapping (canvas ↔ code)
-- Debounced parsing with resilient error boundaries
-- Instrumentation hooks for performance insights on large documents
+- Real-time Monaco ↔ canvas synchronization powered by the AST core
+- Bidirectional selection mapping and cursor telemetry
+- Debounced parsing with resilient error handling and performance monitoring hooks
 
-See [packages/editor-ui/README.md](./packages/editor-ui/README.md) for details.
+Documentation lives in [packages/editor-ui/README.md](./packages/editor-ui/README.md).
 
 ### `@html-editor/paste`
 
-Clipboard integration shims for HTML editing pipelines:
-
-- `readClipboard()` – read HTML + plain text payloads
-- `writeClipboard(data)` – write HTML + text payloads
+Clipboard helpers for reading/writing HTML + plaintext payloads (future integration target for the editor apps).
 
 ## Applications
 
 ### `@html-editor/web`
 
-Tri-pane workspace featuring toolbar, outline, visual canvas, and Monaco editor panes. Powered by Zustand with undo/redo history, selection mapping stubs, keyboard shortcuts, and responsive theming.
+Tri-pane React workspace with toolbar controls, outline explorer, live canvas, and Monaco editor. Features undo/redo history, selection mapping stubs, keyboard shortcuts, and light/dark theming.
+
+### `@html-editor/canvas`
+
+Drag-and-drop visual editor playground showcasing AST-driven canvas interactions:
+
+- Section/container/text/heading/link/image/list/listItem node types
+- Inline editing, attribute editing, duplication, and history coalescing
+- dnd-kit powered reordering with contextual insertion targets
+- DOMPurify-backed sanitization when syncing with the HTML code view
 
 ### `demo`
 
-A minimal showcase wired directly to the shared packages. Run it locally with:
+A lightweight playground wired directly to the shared packages for experimentation.
 
-```bash
-pnpm --filter demo dev
-```
+## Core Features (V1 Beta)
+
+- Visual canvas and Monaco code view stay in sync via a single AST source of truth
+- Drag-and-drop editing, inline text editing, attribute editing, and undo/redo
+- Stable node identity maps enable accurate selection and history tracking
+- Clipboard helpers and paste infrastructure scaffold future workflows
+- Comprehensive AST unit/integration tests plus Playwright smoke coverage for the tri-pane app
 
 ## Root Scripts
 
-- `pnpm dev` – Start development servers (defaults to `@html-editor/web`)
-- `pnpm build` – Build every workspace
-- `pnpm test` / `pnpm test:watch` – Run Vitest suites across packages
+- `pnpm dev` – Start the tri-pane workspace
+- `pnpm dev:canvas` – Start the canvas playground workspace
+- `pnpm build` – Build every workspace/package
+- `pnpm test` / `pnpm test:watch` – Run Vitest suites
 - `pnpm e2e` / `pnpm e2e:ui` – Execute Playwright smoke tests
-- `pnpm lint` / `pnpm lint:fix` – ESLint across the repo
+- `pnpm lint` / `pnpm lint:fix` – ESLint checks
 - `pnpm format` / `pnpm format:check` – Prettier formatting
-- `pnpm typecheck` – TypeScript project references
+- `pnpm typecheck` – Project-wide TypeScript checks
 
-## Testing & Quality
+## Quality & Tooling
 
-- Vitest for unit and integration coverage (happy-dom/jsdom environments)
-- Playwright smoke coverage for the web workspace
-- ESLint + Prettier enforced via Husky and lint-staged
-- Turborepo orchestrates cache-aware builds and type checks
+- Husky + lint-staged enforce formatting and linting on commits
+- Turborepo orchestrates cache-aware builds and checks across workspaces
+- GitHub Actions CI runs lint, typecheck, unit, and E2E stages on pushes/PRs
 
-## Architecture
+## Architecture Overview
 
-Everything converges on the HTML Abstract Syntax Tree (AST). The AST is parsed once, normalized, diffed, and fanned out to:
+Everything centers on the HTML AST:
 
-1. Monaco editor (code view)
-2. Canvas renderer (visual view)
-3. Selection/identity maps shared across both
+1. Incoming HTML is parsed once into a normalized tree with stable IDs
+2. Monaco editor edits update the AST and re-render the canvas
+3. Canvas operations mutate the AST, which serializes back into Monaco
+4. Selection and index maps keep UI regions synchronized
 
-Stable node IDs keep history, selections, and undo/redo coherent across interactions.
+This V1 beta lays the groundwork for future enhancements like collaborative editing, plugin systems, responsive previews, and advanced diffing.
 
 ## License
 
-See [LICENSE](./LICENSE).
-=======
-A visual HTML editor with canvas and code views, featuring drag-and-drop editing, undo/redo history, and real-time synchronization between views.
-
-## Features
-
-### Core Editing
-- **Visual Canvas**: Edit HTML elements visually with drag-and-drop
-- **Code View**: Direct HTML code editing with real-time sync
-- **Node Types**: Section, Container, Text, Heading (h1-h3), Link, Image, List (ul/ol) with ListItem
-
-### Operations
-- **Add**: Insert new elements via inline menu
-- **Delete**: Remove elements with delete button
-- **Move**: Drag-and-drop reordering using dnd-kit
-- **Duplicate**: Clone elements with all properties
-- **Inline Editing**: Double-click text/heading elements for contentEditable editing
-- **Attribute Editing**: Edit href (links) and alt/src (images) via inline toolbar
-
-### History
-- **Undo/Redo**: Full history stack with keyboard shortcuts (Ctrl+Z/Ctrl+Y)
-- **Edit Coalescing**: Rapid edits are grouped together for cleaner history
-
-### Visual Feedback
-- Selection highlighting
-- Hover states
-- Drag overlays
-- Inline toolbars
-
-## Tech Stack
-
-- **React 18** with TypeScript
-- **Vite** for build tooling
-- **dnd-kit** for drag-and-drop
-- **Zustand** for state management
-- **DOMPurify** for HTML sanitization
-
-## Getting Started
-
-### Install Dependencies
-```bash
-npm install
-```
-
-### Development
-```bash
-npm run dev
-```
-
-### Build
-```bash
-npm run build
-```
-
-### Preview Production Build
-```bash
-npm run preview
-```
-
-## Architecture
-
-### AST-based Model
-The editor uses an Abstract Syntax Tree (AST) representation of HTML:
-- Each node has a unique ID, type, and properties
-- Changes to the AST are immediately reflected in both views
-- History is maintained at the AST level
-
-### State Management
-- Single source of truth in Zustand store
-- All operations are atomic and go through the store
-- History is maintained separately from current state
-
-### Synchronization
-- Canvas → Code: AST is serialized to HTML on every change
-- Code → HTML: HTML is parsed back to AST on blur
-- Both views always show the same underlying data
-
-## Usage
-
-### Canvas View
-1. Click to select elements
-2. Double-click text/headings to edit inline
-3. Drag elements to reorder
-4. Use "+ Add Element" to insert new elements
-5. Use inline toolbar to edit link/image attributes
-6. Click duplicate/delete buttons in node headers
-
-### Code View
-1. Edit HTML directly in the textarea
-2. Changes sync to canvas on blur
-3. Invalid HTML is gracefully handled
-
-### Keyboard Shortcuts
-- `Ctrl+Z` / `Cmd+Z`: Undo
-- `Ctrl+Y` / `Cmd+Y` / `Ctrl+Shift+Z`: Redo
-- `Enter`: Save inline edit
-- `Escape`: Cancel inline edit
-
-## Limitations (V1)
-- No plugin system
-- No AI features
-- No markdown support
-- Tables render but are not editable
-- No custom components
->>>>>>> origin/feat-canvas-editing-core
+[MIT](./LICENSE)
