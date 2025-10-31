@@ -1,10 +1,15 @@
-export function debounce<T extends (...args: any[]) => any>(
-  func: T,
+type Procedure<Args extends unknown[]> = (...args: Args) => void;
+type DebouncedFunction<Args extends unknown[]> = ((...args: Args) => void) & {
+  cancel: () => void;
+};
+
+export function debounce<Args extends unknown[]>(
+  func: Procedure<Args>,
   wait: number
-): (...args: Parameters<T>) => void {
+): DebouncedFunction<Args> {
   let timeout: ReturnType<typeof setTimeout> | null = null;
 
-  return function executedFunction(...args: Parameters<T>) {
+  const debounced: DebouncedFunction<Args> = ((...args: Args) => {
     const later = () => {
       timeout = null;
       func(...args);
@@ -14,5 +19,14 @@ export function debounce<T extends (...args: any[]) => any>(
       clearTimeout(timeout);
     }
     timeout = setTimeout(later, wait);
+  }) as DebouncedFunction<Args>;
+
+  debounced.cancel = () => {
+    if (timeout !== null) {
+      clearTimeout(timeout);
+      timeout = null;
+    }
   };
+
+  return debounced;
 }

@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { useEditorStore } from '../store/editorStore.js';
+import type { RootContent } from '@html-editor/core-ast';
 
 export interface PerformanceMetrics {
   parseTime: number;
@@ -25,9 +26,9 @@ export function usePerformanceMonitor(enabled: boolean = true) {
       startTimeRef.current = performance.now();
     } else if (startTimeRef.current > 0) {
       const totalTime = performance.now() - startTimeRef.current;
-      
+
       const nodeCount = ast ? countNodes(ast.children) : 0;
-      
+
       metricsRef.current = {
         parseTime: totalTime,
         renderTime: 0,
@@ -48,15 +49,16 @@ export function usePerformanceMonitor(enabled: boolean = true) {
   return metricsRef.current;
 }
 
-function countNodes(children: any[]): number {
+function countNodes(children: RootContent[]): number {
   let count = 0;
-  
+
   for (const child of children) {
     count++;
-    if (child.type === 'element' && child.children) {
-      count += countNodes(child.children);
+
+    if (child.type === 'element' && Array.isArray(child.children)) {
+      count += countNodes(child.children as RootContent[]);
     }
   }
-  
+
   return count;
 }

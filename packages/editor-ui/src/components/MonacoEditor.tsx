@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import Editor, { OnMount, OnChange } from '@monaco-editor/react';
 import type { editor } from 'monaco-editor';
 import { useEditorStore } from '../store/editorStore.js';
@@ -11,14 +11,10 @@ export interface MonacoEditorProps {
   onReady?: () => void;
 }
 
-export function MonacoEditor({
-  initialValue = '',
-  debounceMs = 75,
-  onReady,
-}: MonacoEditorProps) {
+export function MonacoEditor({ initialValue = '', debounceMs = 75, onReady }: MonacoEditorProps) {
   const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
   const decorationsRef = useRef<string[]>([]);
-  
+
   const {
     htmlContent,
     selectedNodeId,
@@ -29,18 +25,25 @@ export function MonacoEditor({
     initialize,
   } = useEditorStore();
 
-  const debouncedUpdate = useCallback(
-    debounce((value: string) => {
-      updateHtml(value);
-    }, debounceMs),
+  const debouncedUpdate = useMemo(
+    () =>
+      debounce((value: string) => {
+        updateHtml(value);
+      }, debounceMs),
     [updateHtml, debounceMs]
   );
+
+  useEffect(() => {
+    return () => {
+      debouncedUpdate.cancel();
+    };
+  }, [debouncedUpdate]);
 
   useEffect(() => {
     if (initialValue) {
       initialize(initialValue);
     }
-  }, []);
+  }, [initialValue, initialize]);
 
   const handleEditorDidMount: OnMount = (editor, monaco) => {
     editorRef.current = editor;
@@ -66,12 +69,9 @@ export function MonacoEditor({
       // Undo hook - will be implemented in history task
     });
 
-    editor.addCommand(
-      monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift | monaco.KeyCode.KeyZ,
-      () => {
-        // Redo hook - will be implemented in history task
-      }
-    );
+    editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift | monaco.KeyCode.KeyZ, () => {
+      // Redo hook - will be implemented in history task
+    });
 
     onReady?.();
   };

@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { parse, toHtml, addIds, resetIdCounter } from '../index';
+import { parse, toHtmlSync, addIds, resetIdCounter } from '../index';
 
 describe('core-ast', () => {
   beforeEach(() => {
@@ -25,7 +25,7 @@ describe('core-ast', () => {
     it('should convert AST back to HTML', () => {
       const html = '<div>Hello</div>';
       const tree = parse(html);
-      const output = toHtml(tree);
+      const output = toHtmlSync(tree);
       expect(output).toContain('Hello');
       expect(output).toContain('<div>');
     });
@@ -36,17 +36,17 @@ describe('core-ast', () => {
       const html = '<div><p>Hello</p></div>';
       const tree = parse(html);
       const treeWithIds = addIds(tree);
-      const output = toHtml(treeWithIds);
-      expect(output).toContain('data-editor-id');
+      const output = toHtmlSync(treeWithIds);
+      expect(output).toContain('data-id');
     });
 
     it('should increment IDs for multiple elements', () => {
       const html = '<div></div><p></p>';
       const tree = parse(html);
       const treeWithIds = addIds(tree);
-      const output = toHtml(treeWithIds);
-      expect(output).toContain('node-0');
+      const output = toHtmlSync(treeWithIds);
       expect(output).toContain('node-1');
+      expect(output).toContain('node-2');
     });
   });
 });

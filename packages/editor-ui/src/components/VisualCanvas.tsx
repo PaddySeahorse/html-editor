@@ -2,6 +2,9 @@ import { useEffect, useState } from 'react';
 import { useEditorStore } from '../store/editorStore.js';
 import type { Element as HastElement, RootContent } from '@html-editor/core-ast';
 
+type ElementPropValue = string | number | boolean | null | undefined;
+type SanitizedProps = Record<string, ElementPropValue>;
+
 export interface VisualCanvasProps {
   className?: string;
 }
@@ -21,7 +24,9 @@ export function VisualCanvas({ className = '' }: VisualCanvasProps) {
           <strong>Parse Error:</strong> {error}
           <p>Showing last valid content or best-effort recovery.</p>
         </div>
-        {ast && <CanvasContent ast={ast} selectedNodeId={selectedNodeId} onSelectNode={selectNode} />}
+        {ast && (
+          <CanvasContent ast={ast} selectedNodeId={selectedNodeId} onSelectNode={selectNode} />
+        )}
       </div>
     );
   }
@@ -79,11 +84,7 @@ function RenderNode({ node, selectedNodeId, onSelectNode }: RenderNodeProps) {
 
   if (node.type === 'element') {
     return (
-      <ElementNode
-        element={node}
-        selectedNodeId={selectedNodeId}
-        onSelectNode={onSelectNode}
-      />
+      <ElementNode element={node} selectedNodeId={selectedNodeId} onSelectNode={onSelectNode} />
     );
   }
 
@@ -107,11 +108,12 @@ function ElementNode({ element, selectedNodeId, onSelectNode }: ElementNodeProps
     }
   };
 
+  const classTokens = element.properties?.className;
   const className = [
     'canvas-element',
     `canvas-element-${element.tagName}`,
     isSelected ? 'canvas-element-selected' : '',
-    element.properties?.className ? `${element.properties.className}` : '',
+    Array.isArray(classTokens) ? classTokens.join(' ') : (classTokens ?? ''),
   ]
     .filter(Boolean)
     .join(' ');
@@ -125,11 +127,26 @@ function ElementNode({ element, selectedNodeId, onSelectNode }: ElementNodeProps
     position: 'relative',
   };
 
-  const props: Record<string, any> = {};
+  const elementProps: SanitizedProps = {};
   if (element.properties) {
     Object.entries(element.properties).forEach(([key, value]) => {
-      if (key !== 'dataId' && key !== 'className') {
-        props[key] = value;
+      if (key === 'dataId' || key === 'className') {
+        return;
+      }
+
+      if (Array.isArray(value)) {
+        elementProps[key] = value.join(' ');
+        return;
+      }
+
+      if (
+        typeof value === 'string' ||
+        typeof value === 'number' ||
+        typeof value === 'boolean' ||
+        value === null ||
+        value === undefined
+      ) {
+        elementProps[key] = value;
       }
     });
   }
@@ -144,40 +161,35 @@ function ElementNode({ element, selectedNodeId, onSelectNode }: ElementNodeProps
   ));
 
   if (element.tagName === 'img') {
+    const altValue = typeof elementProps.alt === 'string' ? elementProps.alt : undefined;
+
     return (
       <img
-        {...props}
+        {...elementProps}
         className={className}
         style={style}
         onClick={handleClick}
-        alt={props.alt || 'Image'}
+        alt={altValue ?? 'Image'}
       />
     );
   }
 
   if (element.tagName === 'input') {
-    return (
-      <input
-        {...props}
-        className={className}
-        style={style}
-        onClick={handleClick}
-      />
-    );
+    return <input {...elementProps} className={className} style={style} onClick={handleClick} />;
   }
 
   if (element.tagName === 'br') {
-    return <br {...props} className={className} onClick={handleClick} />;
+    return <br {...elementProps} className={className} onClick={handleClick} />;
   }
 
   if (element.tagName === 'hr') {
-    return <hr {...props} className={className} style={style} onClick={handleClick} />;
+    return <hr {...elementProps} className={className} style={style} onClick={handleClick} />;
   }
 
   const Tag = element.tagName as keyof JSX.IntrinsicElements;
 
   return (
-    <Tag {...props} className={className} style={style} onClick={handleClick}>
+    <Tag {...elementProps} className={className} style={style} onClick={handleClick}>
       {children}
     </Tag>
   );

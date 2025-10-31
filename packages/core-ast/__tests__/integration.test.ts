@@ -109,12 +109,12 @@ describe('integration tests', () => {
   it('should support editing workflow: parse -> modify -> serialize', () => {
     const html = '<div><p id="target">Original text</p><p>Other text</p></div>';
 
-    let tree = parseHtml(html);
+    const tree = parseHtml(html);
     assignIds(tree);
 
     const maps = buildIndexMaps(tree);
     const targetNode = Array.from(maps.byId.values()).find(
-      node => node.properties?.id === 'target'
+      (node) => node.properties?.id === 'target'
     );
 
     expect(targetNode).toBeDefined();
