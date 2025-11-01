@@ -1,4 +1,14 @@
 import { create } from 'zustand';
+import { assignIds, parseHtml, toHtmlSync } from '@html-editor/core-ast';
+import type {
+  Root,
+  Element as HastElement,
+  Text as HastText,
+  Comment as HastComment,
+  RootContent as HastRootContent,
+  ElementContent,
+  Properties as HastProperties,
+} from 'hast';
 
 export interface Selection {
   start: number;
@@ -38,16 +48,17 @@ export interface DocumentState {
   selection: Selection | null;
   history: HistoryState;
   ui: UIState;
+  selectedNodeId: string | null;
   setContent: (content: string) => void;
-  setAst: (ast: DocumentNode | null) => void;
   setSelection: (selection: Selection | null) => void;
-  setOutline: (outline: OutlineNode[]) => void;
   enqueueInsert: (element: string) => void;
   toggleTheme: () => void;
   toggleOutline: () => void;
   undo: () => void;
   redo: () => void;
   deleteSelection: () => void;
+  setSelectedNode: (id: string | null) => void;
+  updateTextNode: (id: string, value: string) => void;
 }
 
 const HISTORY_LIMIT = 100;
@@ -75,170 +86,326 @@ const initialHtml = `<!DOCTYPE html>
   </body>
 </html>`;
 
-const mockOutline: OutlineNode[] = [
-  {
-    id: 'node-html',
-    label: 'html',
-    children: [
-      {
-        id: 'node-head',
-        label: 'head',
-        children: [
-          { id: 'node-meta', label: 'meta' },
-          { id: 'node-title', label: 'title' },
-        ],
-      },
-      {
-        id: 'node-body',
-        label: 'body',
-        children: [
-          {
-            id: 'node-hero',
-            label: 'section.hero',
-            children: [
-              { id: 'node-hero-h1', label: 'h1' },
-              { id: 'node-hero-p', label: 'p' },
-              { id: 'node-hero-button', label: 'button' },
-            ],
-          },
-          {
-            id: 'node-features',
-            label: 'section.features',
-            children: [
-              { id: 'node-features-h2', label: 'h2' },
-              {
-                id: 'node-features-ul',
-                label: 'ul',
-                children: [{ id: 'node-li', label: 'li ×3' }],
-              },
-            ],
-          },
-        ],
-      },
-    ],
-  },
-];
-
-const mockAst: DocumentNode = {
-  id: 'root',
-  type: 'root',
-  children: [
-    {
-      id: 'node-html',
-      type: 'element',
-      properties: { tagName: 'html' },
-      children: [
-        {
-          id: 'node-head',
-          type: 'element',
-          properties: { tagName: 'head' },
-          children: [
-            {
-              id: 'node-meta',
-              type: 'element',
-              properties: { tagName: 'meta', charset: 'UTF-8' },
-            },
-            {
-              id: 'node-title',
-              type: 'element',
-              properties: { tagName: 'title' },
-              children: [{ id: 'node-title-text', type: 'text', value: 'HTML Editor' }],
-            },
-          ],
-        },
-        {
-          id: 'node-body',
-          type: 'element',
-          properties: { tagName: 'body' },
-          children: [
-            {
-              id: 'node-hero',
-              type: 'element',
-              properties: { tagName: 'section', className: 'hero' },
-              children: [
-                {
-                  id: 'node-hero-h1',
-                  type: 'element',
-                  properties: { tagName: 'h1' },
-                  children: [
-                    { id: 'node-hero-h1-text', type: 'text', value: 'Welcome to the HTML Editor' },
-                  ],
-                },
-                {
-                  id: 'node-hero-p',
-                  type: 'element',
-                  properties: { tagName: 'p' },
-                  children: [
-                    {
-                      id: 'node-hero-p-text',
-                      type: 'text',
-                      value: 'Edit the code on the right to see live updates here.',
-                    },
-                  ],
-                },
-                {
-                  id: 'node-hero-button',
-                  type: 'element',
-                  properties: { tagName: 'button' },
-                  children: [{ id: 'node-hero-button-text', type: 'text', value: 'Get Started' }],
-                },
-              ],
-            },
-            {
-              id: 'node-features',
-              type: 'element',
-              properties: { tagName: 'section', className: 'features' },
-              children: [
-                {
-                  id: 'node-features-h2',
-                  type: 'element',
-                  properties: { tagName: 'h2' },
-                  children: [{ id: 'node-features-h2-text', type: 'text', value: 'Features' }],
-                },
-                {
-                  id: 'node-features-ul',
-                  type: 'element',
-                  properties: { tagName: 'ul' },
-                  children: [
-                    {
-                      id: 'node-li-1',
-                      type: 'element',
-                      properties: { tagName: 'li' },
-                      children: [
-                        { id: 'node-li-1-text', type: 'text', value: 'Dual-view editing' },
-                      ],
-                    },
-                    {
-                      id: 'node-li-2',
-                      type: 'element',
-                      properties: { tagName: 'li' },
-                      children: [
-                        { id: 'node-li-2-text', type: 'text', value: 'Outline navigation' },
-                      ],
-                    },
-                    {
-                      id: 'node-li-3',
-                      type: 'element',
-                      properties: { tagName: 'li' },
-                      children: [
-                        { id: 'node-li-3-text', type: 'text', value: 'Keyboard shortcuts' },
-                      ],
-                    },
-                  ],
-                },
-              ],
-            },
-          ],
-        },
-      ],
-    },
-  ],
+type IdFactory = {
+  nextElement: () => string;
+  nextText: () => string;
+  nextComment: () => string;
 };
+
+const createIdFactory = (): IdFactory => {
+  let element = 0;
+  let text = 0;
+  let comment = 0;
+
+  return {
+    nextElement: () => `element-${++element}`,
+    nextText: () => `text-${++text}`,
+    nextComment: () => `comment-${++comment}`,
+  };
+};
+
+const toClassName = (value: unknown): string | undefined => {
+  if (!value) {
+    return undefined;
+  }
+  if (Array.isArray(value)) {
+    return value.filter(Boolean).join(' ');
+  }
+  if (typeof value === 'string') {
+    return value;
+  }
+  return undefined;
+};
+
+const isRenderableRootContent = (
+  child: HastRootContent
+): child is HastElement | HastText | HastComment => child.type !== 'doctype';
+
+const hastToDocumentNode = (
+  node: Root | HastElement | HastText | HastComment,
+  ids: IdFactory
+): DocumentNode => {
+  if (node.type === 'root') {
+    return {
+      id: 'root',
+      type: 'root',
+      children: (node.children ?? [])
+        .filter(isRenderableRootContent)
+        .map((child) => hastToDocumentNode(child, ids)),
+    };
+  }
+
+  if (node.type === 'element') {
+    const properties: Record<string, unknown> = { tagName: node.tagName };
+    if (node.properties) {
+      for (const [key, value] of Object.entries(node.properties)) {
+        if (key === 'className') {
+          const className = toClassName(value);
+          if (className) {
+            properties.className = className;
+          }
+          continue;
+        }
+        properties[key] = value as unknown;
+      }
+    }
+
+    const dataId =
+      (properties.dataId as string | undefined) ||
+      (properties.id as string | undefined) ||
+      ids.nextElement();
+
+    properties.dataId = dataId;
+
+    return {
+      id: dataId,
+      type: 'element',
+      properties,
+      children: (node.children ?? []).map((child) => hastToDocumentNode(child, ids)),
+    };
+  }
+
+  if (node.type === 'text') {
+    const baseId = node.position?.start.offset ?? ids.nextText();
+    return {
+      id: `text-${baseId}`,
+      type: 'text',
+      value: node.value ?? '',
+    };
+  }
+
+  if (node.type === 'comment') {
+    const baseId = node.position?.start.offset ?? ids.nextComment();
+    return {
+      id: `comment-${baseId}`,
+      type: 'comment',
+      value: node.value ?? '',
+    };
+  }
+
+  return {
+    id: ids.nextElement(),
+    type: 'element',
+    properties: { tagName: 'div' },
+    children: [],
+  };
+};
+
+const documentNodeToHast = (node: DocumentNode): Root | HastElement | HastText | HastComment => {
+  if (node.type === 'root') {
+    const rootChildren: HastRootContent[] = (node.children ?? []).map(
+      (child) => documentNodeToHast(child) as HastRootContent
+    );
+
+    return {
+      type: 'root',
+      children: rootChildren,
+    } satisfies Root;
+  }
+
+  if (node.type === 'element') {
+    const rawProps = { ...(node.properties ?? {}) };
+    const tagName = String(rawProps.tagName ?? 'div');
+    const { className, ...rest } = rawProps;
+    delete (rest as Record<string, unknown>).tagName;
+
+    const properties: HastProperties = {};
+    for (const [key, value] of Object.entries(rest)) {
+      if (value === undefined) {
+        continue;
+      }
+      if (
+        typeof value === 'string' ||
+        typeof value === 'number' ||
+        typeof value === 'boolean' ||
+        value === null
+      ) {
+        properties[key] = value;
+        continue;
+      }
+      if (Array.isArray(value)) {
+        const normalizedArray = value.map((item) => {
+          if (typeof item === 'string' || typeof item === 'number') {
+            return item;
+          }
+          if (typeof item === 'boolean') {
+            return item ? 'true' : 'false';
+          }
+          return String(item);
+        }) as (string | number)[];
+        properties[key] = normalizedArray;
+        continue;
+      }
+
+      properties[key] = String(value);
+    }
+
+    const classValue = toClassName(className);
+    if (classValue) {
+      properties.className = classValue.split(/\s+/).filter(Boolean);
+    }
+
+    if (typeof properties.dataId !== 'string') {
+      properties.dataId = node.id;
+    }
+
+    const elementChildren: ElementContent[] = (node.children ?? []).map(
+      (child) => documentNodeToHast(child) as ElementContent
+    );
+
+    return {
+      type: 'element',
+      tagName,
+      properties,
+      children: elementChildren,
+    } satisfies HastElement;
+  }
+
+  if (node.type === 'text') {
+    return {
+      type: 'text',
+      value: node.value ?? '',
+    } satisfies HastText;
+  }
+
+  if (node.type === 'comment') {
+    return {
+      type: 'comment',
+      value: node.value ?? '',
+    } satisfies HastComment;
+  }
+
+  return {
+    type: 'text',
+    value: node.value ?? '',
+  } satisfies HastText;
+};
+
+const documentNodeToHtml = (node: DocumentNode): string => {
+  const hast = documentNodeToHast(node);
+  if (hast.type !== 'root') {
+    throw new Error('Expected root node for serialization');
+  }
+  return '<!DOCTYPE html>\n' + toHtmlSync(hast);
+};
+
+const buildOutlineFromDocument = (node: DocumentNode | null): OutlineNode[] => {
+  if (!node || !node.children) {
+    return [];
+  }
+
+  const mapElement = (child: DocumentNode): OutlineNode | null => {
+    if (child.type !== 'element') {
+      return null;
+    }
+
+    const tagName = String(child.properties?.tagName ?? child.type);
+    const className = toClassName(child.properties?.className);
+    const label = className ? `${tagName}.${className.trim().split(/\s+/).join('.')}` : tagName;
+
+    const children = (child.children ?? [])
+      .map(mapElement)
+      .filter((value): value is OutlineNode => Boolean(value));
+
+    return {
+      id: child.id,
+      label,
+      children,
+    };
+  };
+
+  const elementChildren = (node.children ?? []).filter(
+    (child): child is DocumentNode => child.type === 'element'
+  );
+
+  const mappedChildren = elementChildren
+    .map(mapElement)
+    .filter((value): value is OutlineNode => Boolean(value));
+
+  if (node.type === 'root') {
+    return [
+      {
+        id: node.id,
+        label: 'html',
+        children: mappedChildren,
+      },
+    ];
+  }
+
+  return mappedChildren;
+};
+
+const updateTextNodeValue = (
+  node: DocumentNode,
+  id: string,
+  value: string
+): { updated: DocumentNode; changed: boolean } => {
+  if (node.id === id && node.type === 'text') {
+    if (node.value === value) {
+      return { updated: node, changed: false };
+    }
+    return { updated: { ...node, value }, changed: true };
+  }
+
+  if (!node.children || node.children.length === 0) {
+    return { updated: node, changed: false };
+  }
+
+  let childChanged = false;
+  const newChildren = node.children.map((child) => {
+    const result = updateTextNodeValue(child, id, value);
+    if (result.changed) {
+      childChanged = true;
+    }
+    return result.updated;
+  });
+
+  if (!childChanged) {
+    return { updated: node, changed: false };
+  }
+
+  return {
+    updated: {
+      ...node,
+      children: newChildren,
+    },
+    changed: true,
+  };
+};
+
+const deriveDocumentFromHtml = (
+  html: string,
+  fallbackAst: DocumentNode | null
+): { ast: DocumentNode | null; outline: OutlineNode[] } => {
+  try {
+    const root = parseHtml(html) as Root;
+    assignIds(root);
+    const ast = hastToDocumentNode(root, createIdFactory());
+    const outline = buildOutlineFromDocument(ast);
+    return { ast, outline };
+  } catch (error) {
+    console.warn('Failed to parse HTML content', error);
+    if (fallbackAst) {
+      return {
+        ast: fallbackAst,
+        outline: buildOutlineFromDocument(fallbackAst),
+      };
+    }
+    return { ast: null, outline: [] };
+  }
+};
+
+const initialDocument = deriveDocumentFromHtml(initialHtml, null);
+const emptyRoot: DocumentNode = { id: 'root', type: 'root', children: [] };
+const initialAst = initialDocument.ast ?? emptyRoot;
+const initialOutline = initialDocument.outline.length
+  ? initialDocument.outline
+  : buildOutlineFromDocument(initialAst);
 
 export const useDocumentStore = create<DocumentState>((set, get) => ({
   content: initialHtml,
-  ast: mockAst,
-  outline: mockOutline,
+  ast: initialAst,
+  outline: initialOutline,
   selection: null,
   history: {
     past: [],
@@ -250,6 +417,7 @@ export const useDocumentStore = create<DocumentState>((set, get) => ({
     lastInsertType: null,
     lastDeleteTimestamp: null,
   },
+  selectedNodeId: null,
   setContent: (content) => {
     const currentContent = get().content;
     if (currentContent === content) {
@@ -257,10 +425,14 @@ export const useDocumentStore = create<DocumentState>((set, get) => ({
     }
 
     set((state) => {
+      const { ast, outline } = deriveDocumentFromHtml(content, state.ast);
       const newPast = [...state.history.past, state.content].slice(-HISTORY_LIMIT);
 
       return {
         content,
+        ast,
+        outline,
+        selectedNodeId: null,
         history: {
           past: newPast,
           future: [],
@@ -268,9 +440,7 @@ export const useDocumentStore = create<DocumentState>((set, get) => ({
       };
     });
   },
-  setAst: (ast) => set({ ast }),
   setSelection: (selection) => set({ selection }),
-  setOutline: (outline) => set({ outline }),
   enqueueInsert: (element) =>
     set((state) => ({
       ui: {
@@ -302,9 +472,13 @@ export const useDocumentStore = create<DocumentState>((set, get) => ({
       const previous = state.history.past[state.history.past.length - 1];
       const newPast = state.history.past.slice(0, -1);
       const newFuture = [state.content, ...state.history.future].slice(0, HISTORY_LIMIT);
+      const { ast, outline } = deriveDocumentFromHtml(previous, state.ast);
 
       return {
         content: previous,
+        ast,
+        outline,
+        selectedNodeId: null,
         history: {
           past: newPast,
           future: newFuture,
@@ -322,9 +496,13 @@ export const useDocumentStore = create<DocumentState>((set, get) => ({
       const next = state.history.future[0];
       const newFuture = state.history.future.slice(1);
       const newPast = [...state.history.past, state.content].slice(-HISTORY_LIMIT);
+      const { ast, outline } = deriveDocumentFromHtml(next, state.ast);
 
       return {
         content: next,
+        ast,
+        outline,
+        selectedNodeId: null,
         history: {
           past: newPast,
           future: newFuture,
@@ -340,4 +518,29 @@ export const useDocumentStore = create<DocumentState>((set, get) => ({
         lastDeleteTimestamp: Date.now(),
       },
     })),
+  setSelectedNode: (id) => set({ selectedNodeId: id }),
+  updateTextNode: (id, value) =>
+    set((state) => {
+      if (!state.ast) {
+        return state;
+      }
+
+      const { updated, changed } = updateTextNodeValue(state.ast, id, value);
+      if (!changed) {
+        return state;
+      }
+
+      const html = documentNodeToHtml(updated);
+      const newPast = [...state.history.past, state.content].slice(-HISTORY_LIMIT);
+
+      return {
+        ast: updated,
+        content: html,
+        outline: buildOutlineFromDocument(updated),
+        history: {
+          past: newPast,
+          future: [],
+        },
+      };
+    }),
 }));

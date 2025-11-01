@@ -175,13 +175,19 @@ button:disabled {
   padding: 6px 10px;
   border-radius: 6px;
   border: 1px solid transparent;
-  transition: background 0.15s ease, border 0.15s ease;
+  transition: background 0.15s ease, border 0.15s ease, color 0.15s ease;
   font-size: 0.9rem;
 }
 
 .outline__item:hover {
   background: rgba(37, 99, 235, 0.08);
   border-color: rgba(37, 99, 235, 0.15);
+}
+
+.outline__item--active {
+  background: rgba(37, 99, 235, 0.12);
+  border-color: rgba(37, 99, 235, 0.35);
+  color: var(--color-accent);
 }
 
 .outline__placeholder {
@@ -205,6 +211,43 @@ button:disabled {
   color: var(--color-text);
   overflow: auto;
   box-shadow: inset 0 0 0 1px var(--color-border);
+}
+
+.canvas__placeholder {
+  color: var(--color-muted);
+  font-style: italic;
+}
+
+.canvas-node {
+  position: relative;
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  transition: outline 0.15s ease, box-shadow 0.15s ease;
+  cursor: pointer;
+}
+
+.canvas-node:hover {
+  outline-color: rgba(37, 99, 235, 0.25);
+}
+
+.canvas-node--selected {
+  outline-color: var(--color-accent);
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+}
+
+.canvas-text-node {
+  cursor: text;
+}
+
+.canvas-text-node--selected {
+  background: rgba(37, 99, 235, 0.12);
+  border-radius: 2px;
+  padding: 0 2px;
+}
+
+.canvas-text-node[contenteditable='true'] {
+  outline: none;
+  box-shadow: inset 0 -1px 0 0 var(--color-accent);
 }
 
 .canvas__surface h1,

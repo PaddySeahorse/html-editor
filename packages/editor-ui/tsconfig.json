@@ -19,7 +19,11 @@
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "noEmit": false
+    "noEmit": false,
+    "paths": {
+      "@html-editor/core-ast": ["../core-ast/dist/index.d.ts"],
+      "@html-editor/core-ast/*": ["../core-ast/dist/*"]
+    }
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist", "__tests__"]

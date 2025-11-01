@@ -135,6 +135,9 @@ importers:
 
   apps/web:
     dependencies:
+      '@html-editor/core-ast':
+        specifier: workspace:^1.0.0-beta.1
+        version: link:../../packages/core-ast
       '@monaco-editor/react':
         specifier: ^4.6.0
         version: 4.7.0(monaco-editor@0.54.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
