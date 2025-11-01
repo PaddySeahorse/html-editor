@@ -1,0 +1,12 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "composite": true,
+    "types": ["vite/client"],
+    "paths": {
+      "@html-editor/core-ast": ["../../packages/core-ast/dist/index.d.ts"],
+      "@html-editor/core-ast/*": ["../../packages/core-ast/dist/*"]
+    }
+  },
+  "include": ["src"]
+}
