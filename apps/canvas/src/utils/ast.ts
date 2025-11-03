@@ -37,6 +37,17 @@ export function findParentNode(
   return null;
 }
 
+export function getParentInfo(
+  nodes: ASTNode[],
+  childId: string
+): { parentId: string | null; index: number } | null {
+  const res = findParentNode(nodes, childId, null);
+  if (!res) return null;
+  const index = res.parentArray.findIndex((n) => n.id === childId);
+  if (index === -1) return null;
+  return { parentId: res.parent ? res.parent.id : null, index };
+}
+
 export function deleteNode(nodes: ASTNode[], id: string): ASTNode[] {
   return nodes
     .filter(node => node.id !== id)

@@ -1,4 +1,4 @@
-import { useSortable } from '@dnd-kit/sortable';
+import { SortableContext, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { useEffect, useRef } from 'react';
 import { ASTNode } from '../types/ast';
@@ -146,9 +146,14 @@ export function CanvasNode({ node }: CanvasNodeProps) {
       const ListTag = node.tag;
       return (
         <ListTag>
-          {node.children.map((child, i) => (
-            <CanvasNode key={child.id} node={child} index={i} parentId={node.id} />
-          ))}
+          <SortableContext
+            items={node.children.map((c) => c.id)}
+            strategy={verticalListSortingStrategy}
+          >
+            {node.children.map((child, i) => (
+              <CanvasNode key={child.id} node={child} index={i} parentId={node.id} />
+            ))}
+          </SortableContext>
         </ListTag>
       );
     }
@@ -160,9 +165,14 @@ export function CanvasNode({ node }: CanvasNodeProps) {
     if ((node.type === 'section' || node.type === 'container') && node.children) {
       return (
         <>
-          {node.children.map((child, i) => (
-            <CanvasNode key={child.id} node={child} index={i} parentId={node.id} />
-          ))}
+          <SortableContext
+            items={node.children.map((c) => c.id)}
+            strategy={verticalListSortingStrategy}
+          >
+            {node.children.map((child, i) => (
+              <CanvasNode key={child.id} node={child} index={i} parentId={node.id} />
+            ))}
+          </SortableContext>
           {canAcceptChildren(node) && (
             <AddNodeMenu parentId={node.id} index={node.children.length} />
           )}

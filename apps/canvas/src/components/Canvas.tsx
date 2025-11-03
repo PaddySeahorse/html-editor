@@ -5,6 +5,7 @@ import { useEditorStore } from '../store/editorStore';
 import { CanvasNode } from './CanvasNode';
 import { AddNodeMenu } from './AddNodeMenu';
 import { InlineToolbar } from './InlineToolbar';
+import { getParentInfo } from '../utils/ast';
 
 export function Canvas() {
   const { ast, moveNodeById, selectedNodeId } = useEditorStore();
@@ -30,15 +31,17 @@ export function Canvas() {
       return;
     }
     
-    if (active.id !== over.id) {
-      const overId = over.id as string;
-      const activeId = active.id as string;
+    const overId = String(over.id);
+    const currentActiveId = String(active.id);
+
+    if (currentActiveId !== overId) {
+      const activeInfo = getParentInfo(ast, currentActiveId);
+      const overInfo = getParentInfo(ast, overId);
       
-      if (overId.startsWith('drop-')) {
-        const [, parentId, indexStr] = overId.split('-');
-        const targetParentId = parentId === 'root' ? null : parentId;
-        const index = parseInt(indexStr, 10);
-        moveNodeById(activeId, targetParentId, index);
+      if (activeInfo && overInfo) {
+        if (activeInfo.parentId === overInfo.parentId && activeInfo.index !== overInfo.index) {
+          moveNodeById(currentActiveId, activeInfo.parentId, overInfo.index);
+        }
       }
     }
     
