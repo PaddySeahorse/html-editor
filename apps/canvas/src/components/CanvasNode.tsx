@@ -1,18 +1,41 @@
+import type { ReactNode } from 'react';
+import { useEffect, useRef } from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { useEffect, useRef } from 'react';
 import { ASTNode } from '../types/ast';
 import { useEditorStore } from '../store/editorStore';
 import { canAcceptChildren } from '../utils/ast';
 import { AddNodeMenu } from './AddNodeMenu';
+import { getNodeLabel } from '../utils/nodeLabels';
+
+interface DropState {
+  isActive: boolean;
+  isValid: boolean;
+}
+
+type RenderChildrenFn = (
+  parentId: string | null,
+  parentNode: ASTNode | null,
+  nodes: ASTNode[]
+) => ReactNode;
 
 interface CanvasNodeProps {
   node: ASTNode;
   index: number;
   parentId: string | null;
+  renderChildren: RenderChildrenFn;
+  dropState?: DropState;
+  isRecentlyMoved?: boolean;
 }
 
-export function CanvasNode({ node }: CanvasNodeProps) {
+export function CanvasNode({
+  node,
+  index,
+  parentId,
+  renderChildren,
+  dropState,
+  isRecentlyMoved,
+}: CanvasNodeProps) {
   const {
     selectedNodeId,
     hoveredNodeId,
@@ -29,10 +52,18 @@ export function CanvasNode({ node }: CanvasNodeProps) {
     attributes,
     listeners,
     setNodeRef,
+    setActivatorNodeRef,
     transform,
     transition,
     isDragging,
-  } = useSortable({ id: node.id });
+  } = useSortable({
+    id: node.id,
+    data: {
+      type: 'canvas-node',
+      parentId,
+      index,
+    },
+  });
   
   const contentRef = useRef<HTMLDivElement>(null);
   
@@ -43,7 +74,7 @@ export function CanvasNode({ node }: CanvasNodeProps) {
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
-    opacity: isDragging ? 0.5 : 1,
+    opacity: isDragging ? 0.8 : 1,
   };
   
   useEffect(() => {
@@ -142,13 +173,12 @@ export function CanvasNode({ node }: CanvasNodeProps) {
       );
     }
     
-    if (node.type === 'list' && node.children) {
-      const ListTag = node.tag;
+    if (node.type === 'list') {
+      const ListTag = node.tag as keyof JSX.IntrinsicElements;
+      const children = node.children ?? [];
       return (
-        <ListTag>
-          {node.children.map((child, i) => (
-            <CanvasNode key={child.id} node={child} index={i} parentId={node.id} />
-          ))}
+        <ListTag className="node-children node-children--list">
+          {renderChildren(node.id, node, children)}
         </ListTag>
       );
     }
@@ -157,14 +187,15 @@ export function CanvasNode({ node }: CanvasNodeProps) {
       return <span>{node.content}</span>;
     }
     
-    if ((node.type === 'section' || node.type === 'container') && node.children) {
+    if (node.type === 'section' || node.type === 'container') {
+      const children = node.children ?? [];
       return (
         <>
-          {node.children.map((child, i) => (
-            <CanvasNode key={child.id} node={child} index={i} parentId={node.id} />
-          ))}
+          <div className="node-children node-children--container">
+            {renderChildren(node.id, node, children)}
+          </div>
           {canAcceptChildren(node) && (
-            <AddNodeMenu parentId={node.id} index={node.children.length} />
+            <AddNodeMenu parentId={node.id} index={children.length} />
           )}
         </>
       );
@@ -173,37 +204,64 @@ export function CanvasNode({ node }: CanvasNodeProps) {
     return null;
   };
   
-  const getNodeLabel = () => {
-    const labels: Record<string, string> = {
-      section: 'Section',
-      container: 'Container',
-      text: 'Text',
-      heading: `Heading (${node.tag})`,
-      link: 'Link',
-      image: 'Image',
-      list: node.tag === 'ul' ? 'Unordered List' : 'Ordered List',
-      listItem: 'List Item',
-    };
-    return labels[node.type] || node.type;
-  };
+  const classes = ['canvas-node', node.type];
+  
+  if (isSelected) {
+    classes.push('selected');
+  }
+  
+  if (isHovered) {
+    classes.push('hovered');
+  }
+  
+  if (isDragging) {
+    classes.push('dragging');
+  }
+  
+  if (dropState?.isActive) {
+    classes.push('drop-target');
+    if (!dropState.isValid) {
+      classes.push('drop-target-invalid');
+    }
+  }
+  
+  if (isRecentlyMoved) {
+    classes.push('recently-moved');
+  }
   
   return (
     <div
       ref={setNodeRef}
       style={style}
-      className={`canvas-node ${node.type} ${isSelected ? 'selected' : ''} ${isHovered ? 'hovered' : ''}`}
+      className={classes.join(' ')}
       onClick={handleClick}
       onDoubleClick={handleDoubleClick}
       onMouseEnter={() => setHoveredNode(node.id)}
       onMouseLeave={() => setHoveredNode(null)}
-      {...attributes}
-      {...listeners}
     >
       <div className="node-header">
-        <span className="node-label">{getNodeLabel()}</span>
+        <div className="node-header__main">
+          <button
+            type="button"
+            className="node-drag-handle"
+            ref={setActivatorNodeRef}
+            {...listeners}
+            {...attributes}
+            aria-label={`Drag ${getNodeLabel(node)}`}
+          >
+            <span className="node-drag-handle__icon" aria-hidden="true">
+              ⋮⋮
+            </span>
+          </button>
+          <span className="node-label">{getNodeLabel(node)}</span>
+        </div>
         <div className="node-actions">
-          <button onClick={handleDuplicate} title="Duplicate">⎘</button>
-          <button onClick={handleDelete} title="Delete">×</button>
+          <button type="button" onClick={handleDuplicate} title="Duplicate">
+            ⎘
+          </button>
+          <button type="button" onClick={handleDelete} title="Delete">
+            ×
+          </button>
         </div>
       </div>
       <div className="node-body">
