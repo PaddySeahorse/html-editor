@@ -5,10 +5,10 @@ export {
   assignIds as addIds,
   buildIndexMaps,
   findNodeById,
-  resetIdCounter
+  resetIdCounter,
 } from './identity.js';
 export { normalize } from './normalize.js';
-export { applyPatch, replaceNodeById, detectChanges } from './diff.js';
+export { applyPatch, replaceNodeById, moveNodeById, detectChanges } from './diff.js';
 export type {
   Root,
   Element,
@@ -17,5 +17,5 @@ export type {
   RootContent,
   ToHtmlOptions,
   NodeIndexMap,
-  DiffResult
+  DiffResult,
 } from './types.js';

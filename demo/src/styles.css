@@ -133,3 +133,26 @@ body {
 .canvas-element-em {
   font-style: italic;
 }
+
+.canvas-element-dragged {
+  opacity: 0.5 !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.canvas-drag-handle {
+  cursor: grab;
+}
+
+.canvas-drag-handle:active {
+  cursor: grabbing;
+}
+
+.canvas-element-drop-zone-before {
+  border-top: 3px solid #007acc;
+  padding-top: 3px;
+}
+
+.canvas-element-drop-zone-after {
+  border-bottom: 3px solid #007acc;
+  padding-bottom: 3px;
+}
