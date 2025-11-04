@@ -19,6 +19,10 @@ export function getNodeLabel(node: ASTNode): string {
     case 'listItem':
       return 'List Item';
     default:
-      return node.type;
+      return assertNever(node);
   }
+}
+
+function assertNever(value: never): never {
+  throw new Error('Unhandled node type');
 }
