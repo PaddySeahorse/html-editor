@@ -322,6 +322,25 @@ button:disabled {
   }
 }
 
+/* Drag and Drop Styles */
+.canvas-node {
+  position: relative;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.canvas-node-dragged {
+  opacity: 0.5 !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.canvas-drag-handle {
+  cursor: grab;
+}
+
+.canvas-drag-handle:active {
+  cursor: grabbing;
+}
+
 @media (max-width: 640px) {
   button {
     font-size: 0.85rem;

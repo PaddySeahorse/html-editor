@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { assignIds, parseHtml, toHtmlSync } from '@html-editor/core-ast';
+import { assignIds, parseHtml, toHtmlSync, moveNodeById } from '@html-editor/core-ast';
 import type {
   Root,
   Element as HastElement,
@@ -59,6 +59,7 @@ export interface DocumentState {
   deleteSelection: () => void;
   setSelectedNode: (id: string | null) => void;
   updateTextNode: (id: string, value: string) => void;
+  moveNode: (nodeId: string, parentId: string | null, index: number) => void;
 }
 
 const HISTORY_LIMIT = 100;
@@ -542,5 +543,40 @@ export const useDocumentStore = create<DocumentState>((set, get) => ({
           future: [],
         },
       };
+    }),
+  moveNode: (nodeId, parentId, index) =>
+    set((state) => {
+      if (!state.ast) {
+        return state;
+      }
+
+      try {
+        // Convert DocumentNode AST to HAST for moveNodeById
+        const hastRoot = documentNodeToHast(state.ast);
+        if (hastRoot.type !== 'root') {
+          return state;
+        }
+
+        // Move the node in HAST
+        const updatedHast = moveNodeById(hastRoot, nodeId, parentId, index);
+
+        // Convert back to DocumentNode
+        const updated = hastToDocumentNode(updatedHast, createIdFactory());
+        const html = documentNodeToHtml(updated);
+        const newPast = [...state.history.past, state.content].slice(-HISTORY_LIMIT);
+
+        return {
+          ast: updated,
+          content: html,
+          outline: buildOutlineFromDocument(updated),
+          history: {
+            past: newPast,
+            future: [],
+          },
+        };
+      } catch (error) {
+        console.warn('Failed to move node', error);
+        return state;
+      }
     }),
 }));
